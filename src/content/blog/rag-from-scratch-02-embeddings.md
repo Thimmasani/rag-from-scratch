@@ -135,4 +135,4 @@ None of this makes embeddings worse, it makes them a different tool solving a di
 
 Both retrieval methods are now built and both have been shown to fail in specific, demonstrable ways on the same six-document corpus. Part 3 combines them: BM25 and embeddings run independently over the same corpus, their rankings get merged with Reciprocal Rank Fusion (RRF), and the fused ranking should beat either method alone across every query in this set, including the exact-code case this part just complicated.
 
-Full code for this post: `ai_projects/rag_from_scratch/retrieval/` — `embeddings.py`, `compare_semantic.py` (produces the tables above). Uses `sentence-transformers`, installed in a local `.venv` alongside the pure-Python code from Part 1.
+Full code for this post, and the rest of the series: [github.com/Thimmasani/rag-from-scratch](https://github.com/Thimmasani/rag-from-scratch) — see `retrieval/embeddings.py`, `compare_semantic.py` (produces the tables above). Uses `sentence-transformers`, installed in a local `.venv` per `retrieval/README.md`.

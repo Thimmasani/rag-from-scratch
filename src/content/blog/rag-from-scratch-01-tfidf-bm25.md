@@ -356,6 +356,6 @@ The deeper point for a RAG system: neither TF-IDF nor BM25 understands meaning a
 
 [Part 2](/blog/rag-from-scratch-02-embeddings/) takes the exact same toy corpus and queries and runs them through sentence embeddings instead, so you can see "car" vs "automobile" and "weekend weather" resolve correctly once meaning enters the picture — plus a dedicated experiment on what actually happens to an exact code like `SKU-48213-B` once lexical matching is gone (the real answer is more interesting than a simple failure).
 
-Full code for this post: `tfidf.py`, `bm25.py`, `compare.py`, and `query.py` if you want to try your own queries against the corpus.
+Full code for this post, and the rest of the series: [github.com/Thimmasani/rag-from-scratch](https://github.com/Thimmasani/rag-from-scratch) — see `retrieval/tfidf.py`, `bm25.py`, `compare.py`, and `query.py` if you want to try your own queries against the corpus.
 
 If you've hit the vocabulary mismatch problem or wondered how embeddings handle exact codes in a real RAG system, check out part 2 for a concrete answer.
