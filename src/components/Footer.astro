@@ -1,0 +1,48 @@
+---
+const today = new Date();
+---
+
+<footer>
+	&copy; {today.getFullYear()} Dinesh Reddy Thimmasani. All rights reserved.
+	<div class="social-links">
+		<a href="https://www.linkedin.com/in/dinesh-reddy-thimmasani-11640899/" target="_blank" rel="noopener noreferrer">
+			<span class="sr-only">LinkedIn</span>
+			<svg viewBox="0 0 16 16" aria-hidden="true" width="28" height="28"
+				><path
+					fill="currentColor"
+					d="M14.816 0H1.18A1.175 1.175 0 0 0 0 1.17v13.66A1.175 1.175 0 0 0 1.18 16h13.635A1.178 1.178 0 0 0 16 14.83V1.17A1.178 1.178 0 0 0 14.816 0ZM4.744 13.63H2.372V5.996h2.372v7.635ZM3.558 4.95a1.374 1.374 0 1 1 0-2.747 1.374 1.374 0 0 1 0 2.746Zm10.073 8.68h-2.37V9.914c0-.885-.016-2.023-1.234-2.023-1.235 0-1.424.964-1.424 1.96v3.78h-2.37V5.995h2.275v1.043h.032a2.496 2.496 0 0 1 2.246-1.233c2.4 0 2.845 1.58 2.845 3.634v4.192Z"
+				></path></svg
+			>
+		</a>
+		<a href="mailto:thimmasanidineshreddy19@gmail.com">
+			<span class="sr-only">Email</span>
+			<svg viewBox="0 0 16 16" aria-hidden="true" width="28" height="28"
+				><path
+					fill="currentColor"
+					d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555ZM0 4.697v7.104l5.803-3.558L0 4.697ZM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-1.239-.757Zm3.436-1.586L16 11.801V4.697l-5.803 2.546Z"
+				></path></svg
+			>
+		</a>
+	</div>
+</footer>
+<style>
+	footer {
+		padding: 2em 1em 6em 1em;
+		background: linear-gradient(var(--gray-gradient)) no-repeat;
+		color: rgb(var(--gray));
+		text-align: center;
+	}
+	.social-links {
+		display: flex;
+		justify-content: center;
+		gap: 1em;
+		margin-top: 1em;
+	}
+	.social-links a {
+		text-decoration: none;
+		color: rgb(var(--gray));
+	}
+	.social-links a:hover {
+		color: rgb(var(--gray-dark));
+	}
+</style>

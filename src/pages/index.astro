@@ -1,0 +1,155 @@
+---
+import { Image } from 'astro:assets';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import profilePhoto from '../assets/profile.png';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+	</head>
+	<body class="homepage">
+		<Header />
+		<main>
+			<div class="card">
+				<Image src={profilePhoto} alt="Dinesh Reddy Thimmasani" width={320} height={320} class="profile-photo" />
+				<div class="bio">
+					<h1>About Me</h1>
+					<p>
+						Hi there, I'm a Machine Learning Engineer / Data Scientist with close to 6 years of
+						experience in recommendation systems, search, and applied GenAI. I'm currently <strong>Founding Data Scientist (AI/ML) at Shuru</strong>, building hyperlocal personalization
+						and multilingual search for a 20M+ user base, along with multi-agent LLM systems and a
+						computer vision pipeline for content safety.
+					</p>
+					<p>
+						Before this, I worked on credit risk and fair-lending models at <strong>Scienaptic AI</strong>,
+						scaled <strong>Zomato</strong>'s home page recommendation engine, and built recommendation and
+						ranking systems as a Machine Learning Engineer at <strong>Hotstar</strong>. I studied
+						Mathematics and Computing at <strong>IIT Guwahati</strong>.
+					</p>
+					<p>
+						On this site, I write about ML and AI — concepts, systems, and projects built from
+						scratch rather than through framework abstractions. Check out my <a href="/blog">writings</a> for the series.
+					</p>
+				</div>
+			</div>
+
+			<section class="series">
+				<h2>RAG</h2>
+				<ul class="series-list">
+					<li class="done">
+						<a href="/blog/rag-from-scratch-01-tfidf-bm25/">Part 1: Lexical retrieval — TF-IDF &amp; BM25</a>
+					</li>
+					<li class="done">
+						<a href="/blog/rag-from-scratch-02-embeddings/">Part 2: Semantic retrieval — embeddings</a>
+					</li>
+					<li class="upcoming">Part 3: Hybrid retrieval — BM25 + semantic fusion</li>
+					<li class="upcoming">Part 4: Reranking — cross-encoders &amp; ColBERT</li>
+					<li class="upcoming">Part 5: The generation layer</li>
+					<li class="upcoming">Part 6: Evaluating RAG</li>
+				</ul>
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>
+
+<style>
+	body.homepage {
+		background: #f7f7f8;
+		min-height: 100vh;
+	}
+	body.homepage main {
+		max-width: 1200px;
+		width: 75%;
+		margin: 0 auto;
+	}
+	.card {
+		display: flex;
+		gap: 2.5em;
+		align-items: flex-start;
+		background: #fff;
+		border-radius: 12px;
+		padding: 2.5em;
+		box-shadow: var(--box-shadow);
+	}
+	.profile-photo {
+		width: 160px;
+		height: 160px;
+		object-fit: cover;
+		border-radius: 12px;
+		flex-shrink: 0;
+	}
+	.bio h1 {
+		font-size: 1.3em;
+		margin: 0 0 0.6em 0;
+	}
+	.bio p {
+		margin: 0 0 1em 0;
+		font-size: 0.95em;
+		line-height: 1.7;
+	}
+	.bio p:last-child {
+		margin-bottom: 0;
+	}
+	@media (max-width: 600px) {
+		.card {
+			flex-direction: column;
+			align-items: center;
+			text-align: center;
+			padding: 1.8em;
+		}
+	}
+
+	.series {
+		margin-top: 2.5em;
+		padding: 0 0.5em;
+	}
+	.series h2 {
+		font-size: 1.2em;
+		margin: 0 0 1em 0;
+	}
+	.series-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.7em;
+	}
+	.series-list li {
+		font-size: 0.95em;
+		padding-left: 1.4em;
+		position: relative;
+	}
+	.series-list li::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0.5em;
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+	}
+	.series-list li.done::before {
+		background: var(--accent);
+	}
+	.series-list li.upcoming::before {
+		background: rgb(var(--gray-light));
+	}
+	.series-list li.upcoming {
+		color: rgb(var(--gray));
+	}
+	.series-list li.done a {
+		color: var(--black);
+		text-decoration: none;
+		font-weight: 600;
+	}
+	.series-list li.done a:hover {
+		text-decoration: underline;
+	}
+</style>
