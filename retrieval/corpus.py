@@ -17,6 +17,13 @@ article:
     demonstrates TF-IDF's lack of term-frequency saturation (it over-rewards
     repetition) vs BM25, which saturates and keeps a short, naturally
     on-topic document competitive.
+
+Part 1's and Part 2's main comparisons both run against this exact 6-document
+DOCUMENTS list, so every score printed in those articles stays reproducible.
+Part 2's extra wrong-document experiment uses a SEPARATE, extended corpus
+(DOCUMENTS_WITH_INVOICE below) rather than appending to DOCUMENTS directly --
+appending here would change every IDF value in Part 1's hand-worked
+calculations, since IDF depends on total document count.
 """
 
 DOCUMENTS = [
@@ -52,14 +59,27 @@ QUERIES = [
     "oil change",
 ]
 
-# Extra queries for Part 2 (semantic retrieval): probing how embeddings
-# handle an exact code that was NOT the one actually in the corpus, with
-# and without surrounding natural-language context. See writing/02 for
-# the discussion -- embeddings don't fail on exact codes outright, they
-# degrade gracefully by latching onto surrounding context words instead
-# of the code itself.
-UNSEEN_CODE_QUERIES = [
-    "SKU-48213-B",  # the real code, present in doc2
-    "XJQ-99281-Z",  # a structurally similar but entirely unseen code, alone
-    "part number XJQ-99281-Z is on back order",  # unseen code + context
+# --- Part 2 wrong-document experiment: a separate, extended corpus -------
+#
+# doc6 (invoice number) is a second code-bearing document in a totally
+# different domain from doc2's SKU code, but sharing the same numeric
+# digits -> used to show embeddings routing a bare ID to the wrong document
+# when the only signal distinguishing them is a prefix convention ("SKU-"
+# vs "INV-") the model doesn't weight correctly. Kept separate from
+# DOCUMENTS above so Part 1's lexical scores stay exactly reproducible.
+DOCUMENTS_WITH_INVOICE = DOCUMENTS + [
+    "invoice number INV-77213-K was paid on March 3rd",
+]
+
+DOC_LABELS_WITH_INVOICE = DOC_LABELS + [
+    "doc6: invoice number (billing, different domain than doc2's SKU)",
+]
+
+# Bare invoice-style ID that shares digits with doc2's SKU code, used
+# against DOCUMENTS_WITH_INVOICE to show embeddings routing to the WRONG
+# document. See writing/02_embeddings.md for the discussion.
+WRONG_DOC_QUERIES = [
+    "INV-48213-B",            # bare invoice-style ID, digits match doc2's SKU
+    "invoice INV-48213-B",    # same ID, with one word of context added
+    "INV-48213-B was paid",   # same ID, with more natural-language context
 ]

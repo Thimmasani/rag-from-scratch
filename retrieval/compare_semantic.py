@@ -4,7 +4,14 @@ corpus + queries. Source for the tables in writing/02_embeddings.md --
 keep output format stable since the writeup quotes it.
 """
 
-from corpus import DOCUMENTS, DOC_LABELS, QUERIES, UNSEEN_CODE_QUERIES
+from corpus import (
+    DOCUMENTS,
+    DOC_LABELS,
+    QUERIES,
+    DOCUMENTS_WITH_INVOICE,
+    DOC_LABELS_WITH_INVOICE,
+    WRONG_DOC_QUERIES,
+)
 from tfidf import TfidfRetriever
 from bm25 import Bm25Retriever
 from embeddings import EmbeddingRetriever
@@ -23,12 +30,14 @@ def print_three_way(query: str, tfidf: TfidfRetriever, bm25: Bm25Retriever, emb:
     print()
 
 
-def print_unseen_code_experiment(emb: EmbeddingRetriever):
-    print("=== Unseen code experiment (embeddings only) ===\n")
-    for query in UNSEEN_CODE_QUERIES:
+def print_wrong_doc_experiment(emb_with_invoice: EmbeddingRetriever):
+    # Uses the EXTENDED corpus (with doc6, the invoice document) -- separate
+    # from DOCUMENTS above so Part 1's lexical scores stay reproducible.
+    print("=== Wrong-document experiment (embeddings only, extended corpus) ===\n")
+    for query in WRONG_DOC_QUERIES:
         print(f'Query: "{query}"')
-        for doc_idx, score in emb.search(query, top_k=3):
-            print(f"  {score:.4f}  {DOC_LABELS[doc_idx]}")
+        for doc_idx, score in emb_with_invoice.search(query, top_k=3):
+            print(f"  {score:.4f}  {DOC_LABELS_WITH_INVOICE[doc_idx]}")
         print()
 
 
@@ -40,4 +49,5 @@ if __name__ == "__main__":
     for query in QUERIES:
         print_three_way(query, tfidf, bm25, emb)
 
-    print_unseen_code_experiment(emb)
+    emb_with_invoice = EmbeddingRetriever(DOCUMENTS_WITH_INVOICE)
+    print_wrong_doc_experiment(emb_with_invoice)

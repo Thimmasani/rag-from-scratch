@@ -1,6 +1,6 @@
 ---
 title: 'Building RAG From Scratch, Part 2: Semantic Retrieval With Embeddings'
-description: 'Swapping lexical matching for sentence embeddings on the same toy corpus from Part 1 -- where embeddings fix vocabulary mismatch, where they degrade gracefully on exact codes, and what that means for hybrid search.'
+description: 'Swapping lexical matching for sentence embeddings on the same toy corpus from Part 1 -- where embeddings fix vocabulary mismatch, where they route a bare ID to the wrong document entirely, and what that means for hybrid search.'
 pubDate: 'Oct 04 2026'
 ---
 
@@ -10,7 +10,7 @@ pubDate: 'Oct 04 2026'
 
 Part 1 ended with a clear limitation: TF-IDF and BM25 both failed on "weekend weather" the same way, and neither has any concept that "car" and "automobile" mean the same thing. Both are surface-token matchers, nothing more. Embeddings exist to fix exactly that gap.
 
-This part swaps the scoring function, not the corpus. Same six documents, same five queries from Part 1, plus one new experiment at the end. If you haven't read Part 1, the short version: doc0 and doc1 are the same topic (car maintenance) in different words, doc2 has a one-off exact code (`SKU-48213-B`), doc3 is an unrelated weather sentence, doc4 overlaps doc0's vocabulary, and doc5 is a keyword-stuffed spam document.
+This part swaps the scoring function, not the corpus. Same six documents and five queries from Part 1, plus one new document and one new experiment at the end. If you haven't read Part 1, the short version: doc0 and doc1 are the same topic (car maintenance) in different words, doc2 has a one-off exact code (`SKU-48213-B`), doc3 is an unrelated weather sentence, doc4 overlaps doc0's vocabulary, and doc5 is a keyword-stuffed spam document.
 
 ---
 
@@ -18,7 +18,7 @@ This part swaps the scoring function, not the corpus. Same six documents, same f
 
 An embedding model maps text to a dense vector where geometric closeness tracks semantic similarity, not lexical overlap. Two sentences with zero shared words can land close together if they mean similar things; two sentences sharing several words can land far apart if the words are used in unrelated senses.
 
-For this part I used `sentence-transformers/all-MiniLM-L6-v2` — a small (384-dimensional), fast, widely used sentence embedding model. Worth being precise about what's "from scratch" here and what isn't: training a competitive embedding model yourself is a different, much larger project (that's what B3's dual-encoder training setup covers). What *is* from scratch in this post is the retrieval logic itself — we're not calling a vector-DB's `.search()` method or a LangChain `Retriever`. We embed, we rank by a dot product we compute ourselves, and that's it.
+For this part I used `sentence-transformers/all-MiniLM-L6-v2` — a small (384-dimensional), fast, widely used sentence embedding model. The retrieval logic is still from scratch: no vector-DB `.search()`, no LangChain `Retriever`, just embed and rank by a dot product computed directly.
 
 ```python
 from sentence_transformers import SentenceTransformer
@@ -93,28 +93,33 @@ Recall from Part 1: TF-IDF ranked the spam document doc5 **first** here (0.6551)
 
 ---
 
-## Where embeddings get interesting: the exact-code query
+## Where embeddings actually break: the wrong-document case
 
-Part 1's "SKU-48213-B" query was lexical retrieval's strongest case — rare exact string, both TF-IDF and BM25 nail it immediately. The natural assumption going into this part was that embeddings would fail here, since a model has no learned concept of an arbitrary product code.
-
-Running it directly:
+Part 1's "SKU-48213-B" query was lexical retrieval's strongest case — rare exact string, both TF-IDF and BM25 nail it immediately. Embeddings get it right too:
 
 | doc | Embeddings |
 |---|---|
 | doc2: exact SKU code | **0.5710** |
 | doc0 | 0.1219 |
 
-That's not a failure — the embedding model actually ranks the right document first with a healthy margin. Worth being honest about this rather than forcing the "embeddings can't do exact match" narrative the setup implied. So I pushed further: is it actually understanding the code, or picking up on something else? I tried a second, structurally similar code the model has never seen in this corpus, both bare and wrapped in context:
+To find a real failure, I added a second code-bearing document to the corpus — doc6, an invoice number from a completely different domain (billing, not inventory), but one that happens to share digits with doc2's SKU code:
 
-| query | top result | score |
-|---|---|---|
-| `"SKU-48213-B"` (the real code, in doc2) | doc2 | **0.5710** |
-| `"XJQ-99281-Z"` (unseen code, alone) | doc2 | 0.1845 |
-| `"part number XJQ-99281-Z is on back order"` (unseen code + context) | doc2 | 0.5273 |
+```python
+# doc2: "replacement part SKU-48213-B is on back order until next week"
+# doc6: "invoice number INV-77213-K was paid on March 3rd"
+```
 
-This is the actual finding, and it's more precise than "embeddings fail on codes." A bare, never-seen code scores weakly (0.1845 — barely above noise, and only still-highest because doc2 is structurally the only "code-like" document in a six-document corpus). But the same unseen code embedded in natural surrounding language ("part number ... is on back order") jumps straight back up to 0.5273, almost matching the real code's score. The model isn't matching the code string at all in that case — it's matching the surrounding words ("part number," "back order") against doc2's own phrasing. The code itself is just along for the ride.
+Now query a bare, invoice-style ID that reuses doc2's exact digits with a different prefix — `"INV-48213-B"`, which should obviously route to the invoice document, not the SKU one:
 
-That's an important distinction for RAG in production: embeddings don't hard-fail on identifiers, they degrade gracefully by falling back to whatever natural-language context surrounds the identifier. If your users search bare codes with no context ("SKU-48213-B" and nothing else), you're relying on coincidence, not retrieval. If they always type codes inside a sentence, embeddings alone might limp by. Either way, this is exactly the gap a lexical signal closes deterministically — which is the whole argument for hybrid retrieval in Part 3.
+| query | top result | score | 2nd place | score |
+|---|---|---|---|---|
+| `"INV-48213-B"` (bare ID, wrong prefix convention) | **doc2 (SKU) — wrong** | 0.4217 | doc6 (invoice, correct answer) | 0.4092 |
+| `"invoice INV-48213-B"` (+ one word of context) | doc6 (invoice) — correct | **0.7727** | doc2 (SKU) | 0.3853 |
+| `"INV-48213-B was paid"` (+ more context) | doc6 (invoice) — correct | **0.6559** | doc2 (SKU) | 0.4139 |
+
+This is the real failure, and it's a close one — 0.4217 vs 0.4092, basically a coin flip. The model is pattern-matching on the shared digits ("48213-B") rather than the prefix that actually distinguishes the two document types ("INV-" means invoice, "SKU-" means inventory part, but the model doesn't weight that distinction strongly from a bare code alone). The instant you add a single word of natural-language context — just "invoice" — the correct document jumps to 0.7727 and the wrong one drops to 0.3853. One word of context completely flips the ranking.
+
+That's the actual, concrete lesson: embeddings are matching *meaning*, and a bare identifier barely has any — so the model falls back to whatever weak signal is left (shared digits, structural similarity), which can point at the wrong document when two different ID systems happen to overlap numerically. This is a realistic production scenario too: separate systems (inventory, billing, support tickets) frequently reuse number ranges, and users searching by raw ID without context are exactly the case embeddings handle worst.
 
 ---
 
@@ -125,7 +130,7 @@ To be fair to Part 1, lexical retrieval had real advantages this part gives up:
 - **No training, no model, no inference cost.** TF-IDF and BM25 are closed-form math over token counts — instant, deterministic, debuggable by hand. Embeddings require running a neural network for every document and every query.
 - **Determinism and exact auditability.** You can hand-verify every TF-IDF/BM25 score (Part 1 did exactly that). Embedding scores come out of a 384-dimensional vector you can't meaningfully inspect term-by-term — you can see *that* two things are similar, not cleanly *why*.
 - **No vocabulary drift risk.** A lexical index built today works identically forever. An embedding model has a version; swap models and your entire index's geometry changes, scores aren't comparable across model versions.
-- **Guaranteed exact match.** As shown above, lexical methods guarantee a rare exact string ranks top whenever it's present. Embeddings only approximate this, and the approximation's quality depends on context you don't control.
+- **Guaranteed exact match.** Lexical methods guarantee a rare exact string ranks top whenever it's present and distinguish ID systems by their literal prefix. Embeddings can route a bare ID to the wrong document entirely when two systems overlap numerically, as shown above.
 
 None of this makes embeddings worse, it makes them a different tool solving a different failure mode. Part 1's lexical methods are strong exactly where embeddings are weak (rare exact tokens, codes, IDs) and weak exactly where embeddings are strong (paraphrase, synonymy, "these mean the same thing but share no words").
 
@@ -133,6 +138,6 @@ None of this makes embeddings worse, it makes them a different tool solving a di
 
 ## What's next
 
-Both retrieval methods are now built and both have been shown to fail in specific, demonstrable ways on the same six-document corpus. Part 3 combines them: BM25 and embeddings run independently over the same corpus, their rankings get merged with Reciprocal Rank Fusion (RRF), and the fused ranking should beat either method alone across every query in this set, including the exact-code case this part just complicated.
+Both retrieval methods are now built and both have been shown to fail in specific, demonstrable ways on the same corpus. Part 3 combines them: BM25 and embeddings run independently, their rankings get merged with Reciprocal Rank Fusion (RRF), and the fused ranking should beat either method alone across every query in this set, including the wrong-document case this part just exposed.
 
-Full code for this post: `ai_projects/rag_from_scratch/retrieval/` — `embeddings.py`, `compare_semantic.py` (produces the tables above). Uses `sentence-transformers`, installed in a local `.venv` alongside the pure-Python code from Part 1.
+Full code for this post, and the rest of the series: [github.com/Thimmasani/rag-from-scratch](https://github.com/Thimmasani/rag-from-scratch) — see `retrieval/embeddings.py`, `compare_semantic.py` (produces the tables above). Uses `sentence-transformers`, installed in a local `.venv` per `retrieval/README.md`.

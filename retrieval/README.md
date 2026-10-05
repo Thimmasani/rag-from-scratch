@@ -61,8 +61,17 @@ python3 query.py           # interactive: type your own queries, see live scores
 
 # Part 2 -- semantic retrieval (embeddings)
 python3 embeddings.py      # embedding-based scores on the toy corpus
-python3 compare_semantic.py  # three-way table: TF-IDF vs BM25 vs embeddings
+python3 compare_semantic.py  # three-way table + wrong-document experiment
 ```
+
+`compare_semantic.py` runs two things: the three-way TF-IDF/BM25/embeddings
+comparison on the same 6-document corpus Part 1 uses (so those numbers stay
+reproducible), and a separate wrong-document experiment on an *extended*
+7-document corpus (`DOCUMENTS_WITH_INVOICE` in `corpus.py`) that adds an
+invoice-number document to show embeddings routing a bare ID to the wrong
+document. The extra document is kept out of the main corpus deliberately --
+adding it there would shift every IDF value and break Part 1's hand-worked
+calculations.
 
 ## Files
 
