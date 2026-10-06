@@ -83,3 +83,14 @@ WRONG_DOC_QUERIES = [
     "invoice INV-48213-B",    # same ID, with one word of context added
     "INV-48213-B was paid",   # same ID, with more natural-language context
 ]
+
+# Part 3 (hybrid retrieval / RRF): a query mixing a semantic signal
+# ("automobile", "service") with an exact code string. Embeddings alone
+# favor doc2 (the SKU doc) because the exact code dominates the embedding;
+# BM25 alone strongly favors doc1 (the actual intended document, matching
+# "automobile" and "service"). Fusing them pulls doc2's wrongful lead back
+# to an exact tie with doc1 -- not a clean win, which is itself the point:
+# RRF ties whenever two retrievers swap which of two documents ranks #1 vs
+# #2, regardless of how different their underlying scores actually are.
+# See writing/03_hybrid_rrf.md.
+HYBRID_RESCUE_QUERY = "automobile SKU-48213-B service"
