@@ -18,12 +18,13 @@ article:
     repetition) vs BM25, which saturates and keeps a short, naturally
     on-topic document competitive.
 
-Part 1's and Part 2's main comparisons both run against this exact 6-document
-DOCUMENTS list, so every score printed in those articles stays reproducible.
-Part 2's extra wrong-document experiment uses a SEPARATE, extended corpus
-(DOCUMENTS_WITH_INVOICE below) rather than appending to DOCUMENTS directly --
-appending here would change every IDF value in Part 1's hand-worked
-calculations, since IDF depends on total document count.
+Every part's main comparisons -- Parts 1, 2, 3, 4, and 6's recall@k eval --
+run against this exact 6-document DOCUMENTS list, so every score printed
+across the whole series stays reproducible. Parts 2's wrong-document
+experiment uses a SEPARATE, extended corpus (DOCUMENTS_WITH_INVOICE below)
+rather than appending to DOCUMENTS directly -- appending here would change
+every IDF value in Part 1's hand-worked calculations, since IDF depends on
+total document count.
 """
 
 DOCUMENTS = [

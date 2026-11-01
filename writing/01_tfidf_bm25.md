@@ -107,7 +107,7 @@ dot(q, doc0) = (1.8473 * 1.8473) + (1.3365 * 1.3365) + (1.5596 * 1.5596)
 cos(q, doc0) = 7.6311 / (2.7624 * 6.0982) = 0.4530
 ```
 
-That matches the `0.4530` TF-IDF score for doc0 on this query that the code prints (see the full table further down — numbers shifted slightly from earlier drafts of this post after adding doc5 to the corpus, since IDF depends on the whole corpus).
+That matches the `0.4530` TF-IDF score for doc0 on this query that the code prints (see the full table further down).
 
 ### Run it yourself
 
@@ -350,12 +350,8 @@ The deeper point for a RAG system: neither TF-IDF nor BM25 understands meaning a
 
 ## What's next
 
-Part 2 (`writing/02_embeddings.md`) takes the exact same toy corpus and queries and runs them through sentence embeddings instead, so you can see "car" vs "automobile" and "weekend weather" resolve correctly once meaning enters the picture — plus a dedicated experiment on what actually happens to an exact code like `SKU-48213-B` once lexical matching is gone (the real answer is more interesting than a simple failure).
+[Part 2](/blog/rag-from-scratch-02-embeddings/) takes the exact same toy corpus and queries and runs them through sentence embeddings instead, so you can see "car" vs "automobile" and "weekend weather" resolve correctly once meaning enters the picture — plus a dedicated experiment on what actually happens to an exact code like `SKU-48213-B` once lexical matching is gone (the real answer is more interesting than a simple failure).
 
-Full code for this post: `ai_projects/rag_from_scratch/retrieval/` — `tfidf.py`, `bm25.py`, `compare.py`, and `query.py` if you want to try your own queries against the corpus.
+Full code for this post, and the rest of the series: [github.com/Thimmasani/rag-from-scratch](https://github.com/Thimmasani/rag-from-scratch) — see `retrieval/tfidf.py`, `bm25.py`, `compare.py`, and `query.py` if you want to try your own queries against the corpus.
 
 If you've hit the vocabulary mismatch problem or wondered how embeddings handle exact codes in a real RAG system, check out part 2 for a concrete answer.
-
----
-
-**Tags:** `Machine Learning`, `Artificial Intelligence`, `NLP`, `Information Retrieval`, `RAG`
