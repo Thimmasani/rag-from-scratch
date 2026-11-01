@@ -61,6 +61,16 @@ To use a different model, change `model_name` in `EmbeddingRetriever`
 the [sentence-transformers model hub](https://huggingface.co/models?library=sentence-transformers)
 works the same way.
 
+## About `hnswlib` (Part 8, not a model)
+
+Part 8 adds `hnswlib` to `requirements.txt` -- a C++ library with Python
+bindings for HNSW approximate nearest-neighbor search, installed via
+`pip install -r requirements.txt` like any other dependency (no download
+cache, no account, no API key; it installs from a prebuilt wheel where
+one's available for your platform, otherwise builds from source via a
+C/C++ compiler). This is the one part of the series that doesn't
+hand-roll its core algorithm -- see Part 8's article for why.
+
 ## Running each part
 
 ```bash
@@ -87,8 +97,28 @@ python3 generation.py       # grounded answer, abstention, and citation examples
 python3 pipeline.py         # the FULL pipeline: Parts 1-5 wired together
 
 # Part 6 -- evaluation
-python3 eval_retrieval.py   # recall@k across BM25, embeddings, hybrid, reranked
+python3 eval_retrieval.py   # recall@k (+ precision@k, MRR, NDCG@k) across BM25, embeddings, hybrid, reranked
 python3 eval_generation.py  # LLM-as-judge groundedness check, two judge designs
+
+# Part 1 addition -- index freshness
+python3 freshness.py        # BM25 IDF shift vs. embedding stability when the corpus grows
+
+# Part 5 addition -- prompt injection
+python3 prompt_injection.py # does the numbered-context/instruction separation hold against an injection attempt?
+
+# Part 7 -- chunking
+python3 chunking.py         # fixed_size_chunks vs sentence_aware_chunks on one sample document
+python3 eval_chunking.py    # boundary-splitting demo, chunk-size sweep, fixed vs sentence-aware comparison
+
+# Part 8 -- vector search at scale (ANN + metadata filtering)
+python3 ann_search.py       # BruteForceIndex vs HnswIndex sanity check on a small synthetic corpus
+python3 eval_ann.py         # recall/latency sweep, ef_search sweep, pre- vs post-filter comparison
+
+# Part 9 -- multi-hop retrieval
+python3 eval_multihop.py    # single-shot vs decomposed retrieval, recall + end-to-end answer correctness
+
+# Part 10 -- RAG vs. long-context LLMs
+python3 eval_longcontext.py # RAG-vs-stuffing cost table, lost-in-the-middle test
 ```
 
 `compare_semantic.py` runs two things: the three-way TF-IDF/BM25/embeddings
@@ -115,7 +145,20 @@ calculations.
 | `compare_hybrid.py` | 3 | BM25 vs embeddings vs RRF, including the exact-tie case |
 | `reranker.py` | 4 | `CrossEncoderReranker`, reranks a short candidate list |
 | `compare_reranked.py` | 4 | Hybrid vs reranked, including two new reranker failure modes |
-| `generation.py` | 5 | `Generator`: relevance check, grounded generation, citation attribution |
+| `generation.py` | 5 | `Generator`: relevance check, grounded generation, citation attribution, `generate_raw()` |
 | `pipeline.py` | 5 | The full Parts 1-5 pipeline, run end to end on every series query |
-| `eval_retrieval.py` | 6 | recall@k across BM25, embeddings, hybrid RRF, and reranked stages |
+| `eval_retrieval.py` | 6 | recall@k, precision@k, MRR, NDCG@k across BM25, embeddings, hybrid RRF, and reranked stages |
 | `eval_generation.py` | 6 | `GroundednessJudge`, two designs, tested against Part 5's real fabrication |
+| `freshness.py` | 1 (addition) | BM25 IDF shift vs. embedding stability when the corpus grows from 6 to 7 docs |
+| `prompt_injection.py` | 5 (addition) | Tests whether `Generator`'s context/instruction separation holds against injection |
+| `chunking_corpus.py` | 7 | Fixture: 4 multi-sentence documents, each with one locatable fact |
+| `chunking.py` | 7 | `fixed_size_chunks`, `sentence_aware_chunks` |
+| `eval_chunking.py` | 7 | Boundary-splitting demo, chunk-size sweep, fixed vs. sentence-aware comparison |
+| `ann_corpus.py` | 8 | Deterministic synthetic corpus generator (`category`/`date` metadata) |
+| `ann_search.py` | 8 | `BruteForceIndex`, `HnswIndex`, `pre_filter_search`, `post_filter_search` |
+| `eval_ann.py` | 8 | Recall/latency sweep, `ef_search` sweep, pre- vs. post-filter comparison |
+| `multihop_corpus.py` | 9 | Fixture: three two-hop fact chains plus distractors |
+| `multihop.py` | 9 | `single_shot_retrieve`, `decompose_and_retrieve` |
+| `eval_multihop.py` | 9 | Recall for "both hop docs retrieved," end-to-end answer correctness |
+| `longcontext.py` | 10 | `build_context` -- assembles a token-budgeted context with a needle fact at a given position |
+| `eval_longcontext.py` | 10 | RAG-vs-stuffing cost table, lost-in-the-middle test |

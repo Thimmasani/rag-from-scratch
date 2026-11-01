@@ -352,10 +352,40 @@ The deeper point for a RAG system: neither TF-IDF nor BM25 understands meaning a
 
 ---
 
+## Index freshness: what changes when the corpus grows
+
+Everything above ran against a fixed, static 6-document corpus. Real corpora grow — new documents get added constantly. What does adding just one document actually cost a lexical index, versus a semantic one?
+
+`corpus.py` already has a second corpus for this, `DOCUMENTS_WITH_INVOICE` (the same 6 documents plus one new invoice document, used by Part 2's wrong-document experiment) — reused here unmodified rather than inventing a new comparison. BM25's IDF for every term depends on `N` (total document count) and `df(t)` (how many documents contain that term) — both corpus-wide statistics. Running both corpora through `Bm25Retriever` and comparing every shared term's IDF:
+
+```
+N (6-doc corpus) = 6, N (7-doc corpus) = 7
+
+term         df (small)   df (large)   idf (small)   idf (large)   shifted?
+car          2            2            1.0296        1.1632        YES (df same!)
+oil          4            4            0.4418        0.5754        YES (df same!)
+the          3            3            0.6931        0.8267        YES (df same!)
+on           2            3            1.0296        0.8267        yes (df changed too)
+... (46 more terms, same pattern)
+```
+
+**50 of 50 shared terms' IDF changed when the 7th document was added. 49 of those 50 shifted despite their own document frequency staying exactly the same** — their weight moved purely because `N` changed underneath them. Adding one document to a BM25 index isn't a local, contained operation; it quietly reweights every other document's score for every future query, unless the index's IDF statistics get recomputed.
+
+Embeddings have no such coupling. Running the same two corpora through `EmbeddingRetriever` and comparing doc0-5's vectors directly:
+
+```
+max absolute difference, doc0-5 embeddings, 6-doc corpus vs 7-doc corpus: 0.0000000000
+(bit-for-bit identical)
+```
+
+Adding the 7th document left the first 6 documents' embeddings completely unchanged — each document's embedding is a pure function of that document's own text, with no dependency on what else is in the corpus. This is the concrete version of a real production concern: lexical indexes (BM25, and TF-IDF by the same logic) need a global recompute as the corpus changes, which production search engines handle by tolerating periodically-stale statistics or paying a recomputation cost on a schedule — "just append a new document" is not actually free the way it is for a dense vector index.
+
+---
+
 ## What's next
 
 [Part 2](/blog/rag-from-scratch-02-embeddings/) takes the exact same toy corpus and queries and runs them through sentence embeddings instead, so you can see "car" vs "automobile" and "weekend weather" resolve correctly once meaning enters the picture — plus a dedicated experiment on what actually happens to an exact code like `SKU-48213-B` once lexical matching is gone (the real answer is more interesting than a simple failure).
 
-Full code for this post, and the rest of the series: [github.com/Thimmasani/rag-from-scratch](https://github.com/Thimmasani/rag-from-scratch) — see `retrieval/tfidf.py`, `bm25.py`, `compare.py`, and `query.py` if you want to try your own queries against the corpus.
+Full code for this post, and the rest of the series: [github.com/Thimmasani/rag-from-scratch](https://github.com/Thimmasani/rag-from-scratch) — see `retrieval/tfidf.py`, `bm25.py`, `compare.py`, `query.py`, and `freshness.py` if you want to try your own queries against the corpus.
 
 If you've hit the vocabulary mismatch problem or wondered how embeddings handle exact codes in a real RAG system, check out part 2 for a concrete answer.

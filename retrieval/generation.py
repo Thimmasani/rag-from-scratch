@@ -72,6 +72,16 @@ class Generator:
         outputs = self.model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
         return self.tokenizer.decode(outputs[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True).strip()
 
+    def generate_raw(self, prompt: str, max_new_tokens: int = 60) -> str:
+        """Public entry point for callers outside this module that need a
+        raw completion for an arbitrary prompt (e.g. Part 9's query
+        decomposition), rather than the structured answer()/relevance-check
+        flow above. Added so cross-module reuse goes through a public
+        method, same convention as .answer()/.search()/.rerank() elsewhere
+        in this series -- nothing outside generation.py should call the
+        underscore-prefixed _generate directly."""
+        return self._generate(prompt, max_new_tokens)
+
     def _is_relevant(self, query: str, numbered_context: str) -> bool:
         """Step 1: a dedicated relevance check, separate from generation.
         See module docstring -- this is more reliable than a single-shot

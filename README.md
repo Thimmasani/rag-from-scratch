@@ -29,6 +29,12 @@ Live site: [dineshreddythimmasani.com](https://dineshreddythimmasani.com)
 │   ├── compare_hybrid.py             # Part 3: BM25 vs embeddings vs RRF table
 │   ├── compare_reranked.py            # Part 4: hybrid vs reranked table
 │   ├── query.py                         # interactive CLI (lexical)
+│   ├── freshness.py                      # Part 1 addition: index freshness
+│   ├── prompt_injection.py                # Part 5 addition: prompt injection test
+│   ├── chunking_corpus.py, chunking.py, eval_chunking.py       # Part 7: chunking
+│   ├── ann_corpus.py, ann_search.py, eval_ann.py                # Part 8: vector search at scale
+│   ├── multihop_corpus.py, multihop.py, eval_multihop.py         # Part 9: multi-hop retrieval
+│   ├── longcontext.py, eval_longcontext.py                        # Part 10: RAG vs long-context
 │   └── README.md                         # setup, including model download instructions
 └── writing/           # article drafts, one per series part
     ├── 01_tfidf_bm25.md
@@ -37,6 +43,10 @@ Live site: [dineshreddythimmasani.com](https://dineshreddythimmasani.com)
     ├── 04_reranking.md
     ├── 05_generation.md
     ├── 06_evaluation.md
+    ├── 07_chunking.md
+    ├── 08_vector_search_at_scale.md
+    ├── 09_multihop_retrieval.md
+    ├── 10_long_context.md
     └── rag_interview_questions.md  # companion Q&A piece, not a numbered part
 ```
 
@@ -48,9 +58,13 @@ Live site: [dineshreddythimmasani.com](https://dineshreddythimmasani.com)
 4. **Reranking** — cross-encoders fix one RRF tie cleanly, but introduce two new failure modes of their own. ✅ published
 5. **The generation layer** — abstention and citations both fail as single-shot instructions and need to be split into separate steps; citation attribution isn't claim verification. ✅ published
 6. **Evaluating the whole pipeline** — recall@k shows reranking actually *hurts* overall accuracy on this query set; an LLM-as-judge groundedness check has its own distinct blind spots. ✅ published — last of the originally planned 6 parts.
-7. (possible stretch) Query rewriting/expansion, NLI-based groundedness checking
+7. **Chunking** — chunk size, overlap, and fixed-size vs. sentence-aware strategy, measured against a fixture long enough to need splitting at all. ✅ published
+8. **Vector search at scale** — brute force vs. HNSW (approximate nearest-neighbor) at up to 10,000 documents, plus pre- vs. post-filter metadata filtering. ✅ published
+9. **Multi-hop retrieval** — query decomposition tested against naive single-shot retrieval on fact-chain questions; decomposition didn't win. ✅ published
+10. **RAG vs. long-context LLMs** — the real token cost and latency of stuffing vs. retrieving, and a direct (negative) test for "lost in the middle" at this scale. ✅ published
+11. (possible stretch) Query rewriting/expansion, NLI-based groundedness checking
 
-**Companion piece (not a numbered part):** [RAG Interview Questions](https://dineshreddythimmasani.com/blog/rag-interview-questions/) — easy to senior level, every answer backed by a specific number or failure case from Parts 1-6 rather than a generic textbook answer.
+**Companion piece (not a numbered part):** [RAG Interview Questions](https://dineshreddythimmasani.com/blog/rag-interview-questions/) — easy to senior level, every answer backed by a specific number or failure case from this series rather than a generic textbook answer.
 
 ## Running the retrieval code
 
@@ -80,8 +94,20 @@ python3 compare_reranked.py
 python3 generation.py         # Part 5, downloads a small generation model on first run
 python3 pipeline.py           # the full Parts 1-5 pipeline, run on every series query
 
-python3 eval_retrieval.py     # Part 6, recall@k across every retrieval stage
+python3 eval_retrieval.py     # Part 6, recall@k (+ precision@k/MRR/NDCG) across every retrieval stage
 python3 eval_generation.py    # Part 6, LLM-as-judge groundedness evaluation
+
+python3 freshness.py          # Part 1 addition, index freshness (BM25 vs embeddings)
+python3 prompt_injection.py   # Part 5 addition, prompt injection via retrieved content
+
+python3 eval_chunking.py      # Part 7, chunking: boundary splits, chunk-size sweep, strategy comparison
+
+pip install hnswlib           # Part 8 only (already in requirements.txt)
+python3 eval_ann.py           # Part 8, brute force vs HNSW, pre- vs post-filter metadata filtering
+
+python3 eval_multihop.py      # Part 9, single-shot vs decomposed retrieval on fact-chain questions
+
+python3 eval_longcontext.py   # Part 10, RAG-vs-stuffing cost table, lost-in-the-middle test
 ```
 
 ## Running the site locally

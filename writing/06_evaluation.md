@@ -1,10 +1,10 @@
 ---
 title: 'Building RAG From Scratch, Part 6: Evaluating the Whole Pipeline'
-description: 'recall@k across every retrieval stage built in this series, and an LLM-as-judge groundedness check tested directly against Part 5''s real fabrication — with a genuinely surprising result: adding reranking made recall@1 worse, not better.'
+description: "recall@k across every retrieval stage built in this series, and an LLM-as-judge groundedness check tested directly against Part 5's real fabrication — with a genuinely surprising result: adding reranking made recall@1 worse, not better."
 pubDate: 'Oct 12 2026'
 ---
 
-*Series: Building RAG From Scratch. Part 6 of 6 — the last of the originally planned parts. Parts 1-5 built lexical retrieval, embeddings, hybrid fusion, reranking, and generation. This part measures all of it against ground truth, instead of trusting that each stage's design intent translated into an actual improvement.*
+*Series: Building RAG From Scratch. Part 6 of 6 originally planned parts — the series continued with Parts 7-10, linked below. Parts 1-5 built lexical retrieval, embeddings, hybrid fusion, reranking, and generation. This part measures all of it against ground truth, instead of trusting that each stage's design intent translated into an actual improvement.*
 
 ---
 
@@ -52,6 +52,23 @@ This isn't a contradiction of Part 4 — it's the aggregate confirmation of exac
 Reranking fixed exactly one case — "weekend weather," the RRF tie Part 3 and Part 4 both highlighted as its success story. It broke three others: the two adversarial cases Part 4 flagged directly (exact-code injection, keyword stuffing), plus a third, "car oil change," where the hybrid stage was already correct and reranking's preference for doc4 over doc0 (the same preference pattern noted back in Part 2's embedding scores) pushed it to the wrong answer. Net effect on this query set: **-2 on recall@1.**
 
 This doesn't mean cross-encoder reranking is bad in general — it's a standard, well-evidenced technique, and this corpus was deliberately stocked with adversarial cases built specifically to probe each stage's weak points across the whole series. What it does mean is that "add a reranker" is not automatically a win, and the only way to know whether it's a win *for your system, on your queries* is to measure it, exactly like this. Trusting the standard advice without measuring it against your own ground truth would have silently shipped a regression.
+
+---
+
+## Beyond recall@k: precision@k, MRR, and NDCG
+
+recall@k answers one question — is the correct document anywhere in the top-k? It says nothing about *where* in the top-k, which is what the next three metrics are for. Computed for real against the same four stages and the same ground truth, at k=1:
+
+| stage | precision@1 | MRR | NDCG@1 |
+|---|---|---|---|
+| BM25 alone | 0.6667 | 0.8333 | 0.6667 |
+| Embeddings alone | 0.6667 | 0.8333 | 0.6667 |
+| Hybrid RRF | 0.8333 | 0.9167 | 0.8333 |
+| Hybrid + reranked | 0.5000 | 0.7222 | 0.5000 |
+
+Look closely and precision@1 and NDCG@1 are identical to recall@1 from the table above, row for row. That's not a coincidence worth glossing over — with this ground truth's single correct document per query, `precision@k` is an exact linear rescaling of `recall@k` (`precision@k = recall@k / k`, so at k=1 they're numerically identical), and NDCG collapses to the same binary signal as precision at k=1 with no graded relevance to show its actual strength (weighing "very relevant" against "somewhat relevant") off. Neither metric adds new information here; stating that plainly matters more than padding the post with metrics that look rigorous without actually measuring anything recall@k didn't already show.
+
+**MRR is the one that does add something.** Unlike the others, it credits partial correctness when the right document is close but not first: hybrid RRF's MRR (0.9167) is higher than its precision@1 (0.8333), because the one query hybrid got "wrong" at rank 1 still had the correct document at rank 2, and MRR gives that partial credit while precision@1 and recall@1 give it nothing. Reranking's MRR (0.7222) tells the same regression story as its recall@1 (0.50), just on a continuous scale instead of a binary one — useful for seeing *how bad* a miss was, not just whether it happened.
 
 ---
 
@@ -109,6 +126,12 @@ Neither judge is good enough to ship as the sole safeguard. The naive version is
 
 ## Where the series goes from here
 
-This closes the six originally planned parts: lexical retrieval, semantic retrieval, hybrid fusion, reranking, generation, and evaluation — each one tested against the last, each fix verified rather than assumed. Natural stretch topics from here: query rewriting/expansion (attacking the "INV-48213-B" bare-ID problem from the query side instead of the retrieval side), or a deeper dive into NLI-based groundedness checking now that this part has shown exactly why a general-purpose small LLM isn't quite enough for it.
+This closes the six originally planned parts: lexical retrieval, semantic retrieval, hybrid fusion, reranking, generation, and evaluation — each one tested against the last, each fix verified rather than assumed.
+
+The series kept going. [Part 7](/blog/rag-from-scratch-07-chunking/) measures chunking (chunk size, overlap, and strategy — none of which the 6-document corpus above was ever long enough to need). [Part 8](/blog/rag-from-scratch-08-vector-search-at-scale/) scales retrieval up to thousands of documents with an approximate nearest-neighbor index, plus metadata filtering. [Part 9](/blog/rag-from-scratch-09-multihop-retrieval/) tests query decomposition against questions that need two documents combined — with a genuinely surprising result in the opposite direction of this part's reranking finding. [Part 10](/blog/rag-from-scratch-10-long-context/) measures the actual cost of skipping retrieval entirely and stuffing a long-context model instead.
+
+Two stretch topics from the original plan remain genuinely open, not covered by Parts 7-10: query rewriting/expansion (attacking the "INV-48213-B" bare-ID problem from the query side instead of the retrieval side), and a deeper dive into NLI-based groundedness checking now that this part has shown exactly why a general-purpose small LLM isn't quite enough for it.
+
+If you want to pressure-test what you've picked up across this series, [RAG Interview Questions](/blog/rag-interview-questions/) covers the same material — easy to senior level — as question-and-answer, each answer backed by real numbers from these parts.
 
 Full code for this post, and the rest of the series: [github.com/Thimmasani/rag-from-scratch](https://github.com/Thimmasani/rag-from-scratch) — see `retrieval/eval_retrieval.py`, `eval_generation.py`.
