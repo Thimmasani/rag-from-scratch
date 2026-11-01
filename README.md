@@ -22,18 +22,21 @@ Live site: [dineshreddythimmasani.com](https://dineshreddythimmasani.com)
 │   ├── reranker.py          # Part 4: cross-encoder reranking
 │   ├── generation.py         # Part 5: generation, abstention, citations
 │   ├── pipeline.py            # Part 5: the full Parts 1-5 pipeline, end to end
-│   ├── compare.py               # Part 1: TF-IDF vs BM25 table
-│   ├── compare_semantic.py       # Part 2: TF-IDF vs BM25 vs embeddings table
-│   ├── compare_hybrid.py          # Part 3: BM25 vs embeddings vs RRF table
-│   ├── compare_reranked.py         # Part 4: hybrid vs reranked table
-│   ├── query.py                     # interactive CLI (lexical)
-│   └── README.md                     # setup, including model download instructions
+│   ├── eval_retrieval.py        # Part 6: recall@k across every retrieval stage
+│   ├── eval_generation.py        # Part 6: LLM-as-judge groundedness evaluation
+│   ├── compare.py                  # Part 1: TF-IDF vs BM25 table
+│   ├── compare_semantic.py          # Part 2: TF-IDF vs BM25 vs embeddings table
+│   ├── compare_hybrid.py             # Part 3: BM25 vs embeddings vs RRF table
+│   ├── compare_reranked.py            # Part 4: hybrid vs reranked table
+│   ├── query.py                         # interactive CLI (lexical)
+│   └── README.md                         # setup, including model download instructions
 └── writing/           # article drafts, one per series part
     ├── 01_tfidf_bm25.md
     ├── 02_embeddings.md
     ├── 03_hybrid_rrf.md
     ├── 04_reranking.md
-    └── 05_generation.md
+    ├── 05_generation.md
+    └── 06_evaluation.md
 ```
 
 ## Series plan
@@ -43,8 +46,8 @@ Live site: [dineshreddythimmasani.com](https://dineshreddythimmasani.com)
 3. **Hybrid retrieval** — BM25 + semantic fusion (RRF), and RRF's own tie-breaking blind spot. ✅ published
 4. **Reranking** — cross-encoders fix one RRF tie cleanly, but introduce two new failure modes of their own. ✅ published
 5. **The generation layer** — abstention and citations both fail as single-shot instructions and need to be split into separate steps; citation attribution isn't claim verification. ✅ published
-6. Evaluating RAG — recall@k, groundedness scoring
-7. (stretch) Query rewriting/expansion, production lessons learned
+6. **Evaluating the whole pipeline** — recall@k shows reranking actually *hurts* overall accuracy on this query set; an LLM-as-judge groundedness check has its own distinct blind spots. ✅ published — last of the originally planned 6 parts.
+7. (possible stretch) Query rewriting/expansion, NLI-based groundedness checking
 
 ## Running the retrieval code
 
@@ -73,6 +76,9 @@ python3 compare_reranked.py
 
 python3 generation.py         # Part 5, downloads a small generation model on first run
 python3 pipeline.py           # the full Parts 1-5 pipeline, run on every series query
+
+python3 eval_retrieval.py     # Part 6, recall@k across every retrieval stage
+python3 eval_generation.py    # Part 6, LLM-as-judge groundedness evaluation
 ```
 
 ## Running the site locally

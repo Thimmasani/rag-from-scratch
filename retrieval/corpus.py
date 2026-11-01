@@ -94,3 +94,28 @@ WRONG_DOC_QUERIES = [
 # #2, regardless of how different their underlying scores actually are.
 # See writing/03_hybrid_rrf.md.
 HYBRID_RESCUE_QUERY = "automobile SKU-48213-B service"
+
+# --- Part 6 (evaluation): ground truth labels -----------------------------
+#
+# The single "correct" document index (into DOCUMENTS) for every query
+# used across the series, established by the discussion in each part's
+# article. Used for recall@k scoring in Part 6. A query mapped to None
+# has NO correct document anywhere in the corpus -- the only correct
+# retrieval/generation behavior is to abstain.
+GROUND_TRUTH = {
+    "car oil change": 0,              # Part 1: natural phrasing is the "home" doc for this query
+    "automobile brake service": 1,     # Parts 1-4: consistently doc1
+    "SKU-48213-B": 2,                   # Part 1: the exact code doc
+    "weekend weather": 3,                # Part 1-4: the actual weather doc (lexical's worst failure)
+    "oil change": 0,                      # Part 1/4: doc0 is correct; doc5 (spam) and doc4 are NOT
+    HYBRID_RESCUE_QUERY: 1,                 # Part 3/4: doc1, despite doc2's exact-code distraction
+    "What is the capital of France?": None,  # no doc in this corpus answers this -- must abstain
+}
+
+# Ground truth on the extended (with-invoice) corpus -- doc6 is correct
+# for all three WRONG_DOC_QUERIES variants (Part 2/3).
+GROUND_TRUTH_WITH_INVOICE = {
+    "INV-48213-B": 6,
+    "invoice INV-48213-B": 6,
+    "INV-48213-B was paid": 6,
+}

@@ -85,6 +85,10 @@ python3 compare_reranked.py # before/after tables, including two new failure mod
 # Part 5 -- generation (abstention + citation attribution)
 python3 generation.py       # grounded answer, abstention, and citation examples
 python3 pipeline.py         # the FULL pipeline: Parts 1-5 wired together
+
+# Part 6 -- evaluation
+python3 eval_retrieval.py   # recall@k across BM25, embeddings, hybrid, reranked
+python3 eval_generation.py  # LLM-as-judge groundedness check, two judge designs
 ```
 
 `compare_semantic.py` runs two things: the three-way TF-IDF/BM25/embeddings
@@ -113,3 +117,5 @@ calculations.
 | `compare_reranked.py` | 4 | Hybrid vs reranked, including two new reranker failure modes |
 | `generation.py` | 5 | `Generator`: relevance check, grounded generation, citation attribution |
 | `pipeline.py` | 5 | The full Parts 1-5 pipeline, run end to end on every series query |
+| `eval_retrieval.py` | 6 | recall@k across BM25, embeddings, hybrid RRF, and reranked stages |
+| `eval_generation.py` | 6 | `GroundednessJudge`, two designs, tested against Part 5's real fabrication |

@@ -176,6 +176,6 @@ That's the entire answer. Given a top context chunk that's eleven repetitions of
 
 ## What's next
 
-Part 6 builds the evaluation layer this series has been implicitly asking for since Part 2: retrieval recall@k over the known-correct answers established in every part so far, and a groundedness check that catches exactly the SKU/oil-change-style fabrication this part surfaced but didn't catch on its own.
+Part 6 builds the evaluation layer this series has been implicitly asking for since Part 2: retrieval recall@k over the known-correct answers established in every part so far, and a groundedness check that tries to catch exactly the SKU/oil-change-style fabrication this part surfaced. Neither turns out to be a clean win — recall@k reveals that reranking actually hurt overall accuracy on this query set, and the groundedness judge has its own, different blind spots.
 
 Full code for this post, and the rest of the series: [github.com/Thimmasani/rag-from-scratch](https://github.com/Thimmasani/rag-from-scratch) — see `retrieval/generation.py`, `pipeline.py` (the full Parts 1-5 pipeline).
