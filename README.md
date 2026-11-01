@@ -36,7 +36,8 @@ Live site: [dineshreddythimmasani.com](https://dineshreddythimmasani.com)
     ├── 03_hybrid_rrf.md
     ├── 04_reranking.md
     ├── 05_generation.md
-    └── 06_evaluation.md
+    ├── 06_evaluation.md
+    └── rag_interview_questions.md  # companion Q&A piece, not a numbered part
 ```
 
 ## Series plan
@@ -48,6 +49,8 @@ Live site: [dineshreddythimmasani.com](https://dineshreddythimmasani.com)
 5. **The generation layer** — abstention and citations both fail as single-shot instructions and need to be split into separate steps; citation attribution isn't claim verification. ✅ published
 6. **Evaluating the whole pipeline** — recall@k shows reranking actually *hurts* overall accuracy on this query set; an LLM-as-judge groundedness check has its own distinct blind spots. ✅ published — last of the originally planned 6 parts.
 7. (possible stretch) Query rewriting/expansion, NLI-based groundedness checking
+
+**Companion piece (not a numbered part):** [RAG Interview Questions](https://dineshreddythimmasani.com/blog/rag-interview-questions/) — easy to senior level, every answer backed by a specific number or failure case from Parts 1-6 rather than a generic textbook answer.
 
 ## Running the retrieval code
 

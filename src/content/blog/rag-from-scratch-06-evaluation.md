@@ -111,4 +111,6 @@ Neither judge is good enough to ship as the sole safeguard. The naive version is
 
 This closes the six originally planned parts: lexical retrieval, semantic retrieval, hybrid fusion, reranking, generation, and evaluation — each one tested against the last, each fix verified rather than assumed. Natural stretch topics from here: query rewriting/expansion (attacking the "INV-48213-B" bare-ID problem from the query side instead of the retrieval side), or a deeper dive into NLI-based groundedness checking now that this part has shown exactly why a general-purpose small LLM isn't quite enough for it.
 
+If you want to pressure-test what you've picked up across this series, [RAG Interview Questions](/blog/rag-interview-questions/) covers the same material — easy to senior level — as question-and-answer, each answer backed by the exact numbers from these six parts.
+
 Full code for this post, and the rest of the series: [github.com/Thimmasani/rag-from-scratch](https://github.com/Thimmasani/rag-from-scratch) — see `retrieval/eval_retrieval.py`, `eval_generation.py`.
