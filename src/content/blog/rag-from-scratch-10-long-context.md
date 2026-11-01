@@ -49,4 +49,6 @@ All three positions found the fact correctly. "Lost in the middle" — the docum
 
 ---
 
-Full code for this post, and this four-part addition to the series (Parts 7-10): [github.com/Thimmasani/rag-from-scratch](https://github.com/Thimmasani/rag-from-scratch) — see `retrieval/longcontext.py`, `eval_longcontext.py`. For the original six-part core series (lexical retrieval through evaluation), start at [Part 1](/blog/rag-from-scratch-01-tfidf-bm25/). For a question-and-answer format covering this same material end to end, see [RAG Interview Questions](/blog/rag-interview-questions/).
+This closed out Parts 7-10 as originally scoped. The series kept going: [Part 11](/blog/rag-from-scratch-11-graphrag/) builds a small knowledge graph to answer questions whose answer is a pattern across every document, not a sentence in any one of them. [Part 12](/blog/rag-from-scratch-12-vectorless-rag/) skips vectors entirely and has the model navigate a document's own section structure instead.
+
+Full code for this post: [github.com/Thimmasani/rag-from-scratch](https://github.com/Thimmasani/rag-from-scratch) — see `retrieval/longcontext.py`, `eval_longcontext.py`. For the original six-part core series (lexical retrieval through evaluation), start at [Part 1](/blog/rag-from-scratch-01-tfidf-bm25/). For a question-and-answer format covering this same material end to end, see [RAG Interview Questions](/blog/rag-interview-questions/).

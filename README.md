@@ -35,6 +35,8 @@ Live site: [dineshreddythimmasani.com](https://dineshreddythimmasani.com)
 │   ├── ann_corpus.py, ann_search.py, eval_ann.py                # Part 8: vector search at scale
 │   ├── multihop_corpus.py, multihop.py, eval_multihop.py         # Part 9: multi-hop retrieval
 │   ├── longcontext.py, eval_longcontext.py                        # Part 10: RAG vs long-context
+│   ├── graphrag_corpus.py, graphrag.py, eval_graphrag.py           # Part 11: GraphRAG
+│   ├── vectorless_corpus.py, vectorless.py, eval_vectorless.py      # Part 12: vectorless RAG
 │   └── README.md                         # setup, including model download instructions
 └── writing/           # article drafts, one per series part
     ├── 01_tfidf_bm25.md
@@ -47,6 +49,8 @@ Live site: [dineshreddythimmasani.com](https://dineshreddythimmasani.com)
     ├── 08_vector_search_at_scale.md
     ├── 09_multihop_retrieval.md
     ├── 10_long_context.md
+    ├── 11_graphrag.md
+    ├── 12_vectorless_rag.md
     └── rag_interview_questions.md  # companion Q&A piece, not a numbered part
 ```
 
@@ -62,7 +66,9 @@ Live site: [dineshreddythimmasani.com](https://dineshreddythimmasani.com)
 8. **Vector search at scale** — brute force vs. HNSW (approximate nearest-neighbor) at up to 10,000 documents, plus pre- vs. post-filter metadata filtering. ✅ published
 9. **Multi-hop retrieval** — query decomposition tested against naive single-shot retrieval on fact-chain questions; decomposition didn't win. ✅ published
 10. **RAG vs. long-context LLMs** — the real token cost and latency of stuffing vs. retrieving, and a direct (negative) test for "lost in the middle" at this scale. ✅ published
-11. (possible stretch) Query rewriting/expansion, NLI-based groundedness checking
+11. **GraphRAG** — a small knowledge graph with local/global search, measured against a question with no single-document answer. ✅ published
+12. **Vectorless RAG** — tree navigation vs. flat embedding retrieval on a document built to confuse similarity search. ✅ published
+13. (possible stretch) Query rewriting/expansion, NLI-based groundedness checking
 
 **Companion piece (not a numbered part):** [RAG Interview Questions](https://dineshreddythimmasani.com/blog/rag-interview-questions/) — easy to senior level, every answer backed by a specific number or failure case from this series rather than a generic textbook answer.
 
@@ -108,6 +114,9 @@ python3 eval_ann.py           # Part 8, brute force vs HNSW, pre- vs post-filter
 python3 eval_multihop.py      # Part 9, single-shot vs decomposed retrieval on fact-chain questions
 
 python3 eval_longcontext.py   # Part 10, RAG-vs-stuffing cost table, lost-in-the-middle test
+
+python3 eval_graphrag.py      # Part 11, entity extraction, local search, global search vs flat retrieval
+python3 eval_vectorless.py    # Part 12, tree navigation vs flat embedding retrieval
 ```
 
 ## Running the site locally

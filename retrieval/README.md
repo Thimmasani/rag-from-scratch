@@ -119,6 +119,12 @@ python3 eval_multihop.py    # single-shot vs decomposed retrieval, recall + end-
 
 # Part 10 -- RAG vs. long-context LLMs
 python3 eval_longcontext.py # RAG-vs-stuffing cost table, lost-in-the-middle test
+
+# Part 11 -- GraphRAG
+python3 eval_graphrag.py    # entity extraction accuracy, local search, global search vs flat retrieval
+
+# Part 12 -- vectorless RAG (tree navigation)
+python3 eval_vectorless.py  # tree navigation vs flat embedding retrieval
 ```
 
 `compare_semantic.py` runs two things: the three-way TF-IDF/BM25/embeddings
@@ -162,3 +168,9 @@ calculations.
 | `eval_multihop.py` | 9 | Recall for "both hop docs retrieved," end-to-end answer correctness |
 | `longcontext.py` | 10 | `build_context` -- assembles a token-budgeted context with a needle fact at a given position |
 | `eval_longcontext.py` | 10 | RAG-vs-stuffing cost table, lost-in-the-middle test |
+| `graphrag_corpus.py` | 11 | Fixture: 9 incident reports, one cross-document pattern, known entity ground truth |
+| `graphrag.py` | 11 | LLM entity extraction, plain dict graph, simplified community detection, local/global search |
+| `eval_graphrag.py` | 11 | Extraction accuracy, local search tie, global search vs. flat retrieval |
+| `vectorless_corpus.py` | 12 | Fixture: a 3-plan service agreement with near-identical cross-section wording |
+| `vectorless.py` | 12 | `navigate_tree` -- top-down LLM section choice, no embeddings |
+| `eval_vectorless.py` | 12 | Tree navigation vs. flat embedding retrieval, 6 queries |
