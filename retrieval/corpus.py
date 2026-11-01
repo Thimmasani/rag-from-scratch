@@ -111,6 +111,29 @@ GROUND_TRUTH = {
     "oil change": 0,                      # Part 1/4: doc0 is correct; doc5 (spam) and doc4 are NOT
     HYBRID_RESCUE_QUERY: 1,                 # Part 3/4: doc1, despite doc2's exact-code distraction
     "What is the capital of France?": None,  # no doc in this corpus answers this -- must abstain
+
+    # --- Part 6 addition: a larger query set, same fixed 6-doc corpus ---
+    #
+    # The original 6 answerable queries above make recall@1 swing by 1/6
+    # (~17 points) per query that flips -- too coarse to tell a real
+    # effect from small-sample noise. These 12 additions are ordinary,
+    # non-adversarial queries against the SAME six documents (no new
+    # documents, no change to any existing entry above), chosen by plain
+    # vocabulary correspondence to one specific document, not chosen to
+    # push the result in either direction. See writing/06_evaluation.md
+    # for what actually happened once these were added.
+    "brake pads replacement": 0,
+    "new brake pads needed": 0,
+    "engine oil service": 1,
+    "automobile engine maintenance": 1,
+    "SKU 48213 back order": 2,
+    "replacement part back order": 2,
+    "sunny afternoon weather": 3,
+    "light breeze today": 3,
+    "car dealership weekend offer": 4,
+    "free weekend car deal": 4,
+    "oil discount coupon": 5,
+    "cheap oil near me": 5,
 }
 
 # Ground truth on the extended (with-invoice) corpus -- doc6 is correct

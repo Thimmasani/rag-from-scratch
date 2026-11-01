@@ -107,6 +107,40 @@ def evaluate_stage_extended(name: str, rank_fn, queries_and_answers: dict[str, i
     print()
 
 
+def hybrid_vs_reranked_breakdown(hybrid: HybridRetriever, reranker: CrossEncoderReranker, queries_and_answers: dict[str, int]):
+    """Per-query top-1 breakdown, hybrid vs. reranked -- lets the larger
+    query set's net recall@1 change be traced back to which specific
+    queries flipped, not just the aggregate number."""
+    print("=== Per-query top-1: hybrid vs. reranked ===\n")
+    fixed, broke, unchanged_correct, unchanged_wrong = 0, 0, 0, 0
+
+    for query, correct_doc in queries_and_answers.items():
+        hybrid_top1 = hybrid.search(query, top_k=1)[0][0]
+        candidates = [idx for idx, _ in hybrid.search(query, top_k=4)]
+        reranked_top1 = reranker.rerank(query, DOCUMENTS, candidates)[0][0]
+
+        hybrid_ok = hybrid_top1 == correct_doc
+        reranked_ok = reranked_top1 == correct_doc
+
+        if hybrid_ok and not reranked_ok:
+            effect, broke = "reranking BROKE it", broke + 1
+        elif not hybrid_ok and reranked_ok:
+            effect, fixed = "reranking FIXED it", fixed + 1
+        elif hybrid_ok and reranked_ok:
+            effect, unchanged_correct = "unchanged (correct)", unchanged_correct + 1
+        else:
+            effect, unchanged_wrong = "unchanged (wrong)", unchanged_wrong + 1
+
+        print(f'  "{query}": hybrid=doc{hybrid_top1} ({"correct" if hybrid_ok else "wrong"})  '
+              f'reranked=doc{reranked_top1} ({"correct" if reranked_ok else "wrong"})  -- {effect}')
+
+    n = len(queries_and_answers)
+    print(f"\n  {n} queries total. Reranking fixed {fixed}, broke {broke}, "
+          f"left {unchanged_correct} unchanged-correct and {unchanged_wrong} unchanged-wrong.")
+    print(f"  Net recall@1 effect of reranking: {fixed - broke:+d} queries "
+          f"({(fixed - broke) / n:+.3f} on recall@1).\n")
+
+
 if __name__ == "__main__":
     bm25 = Bm25Retriever(DOCUMENTS)
     emb = EmbeddingRetriever(DOCUMENTS)
@@ -164,3 +198,5 @@ if __name__ == "__main__":
         1,
     )
     evaluate_stage_extended("Hybrid + reranked (Part 4)", reranked_order, answerable, 1)
+
+    hybrid_vs_reranked_breakdown(hybrid, reranker, answerable)

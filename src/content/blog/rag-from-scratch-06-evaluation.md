@@ -14,44 +14,52 @@ Every part in this series has reported specific findings by hand: this query fai
 
 ## recall@k across every retrieval stage
 
-recall@k for one query is 1 if the correct document appears anywhere in the top-k results, 0 otherwise. Averaged across queries, it answers a narrower but critical question: before worrying about rank order, did the retrieval stage even keep the right document in play? Every query used across Parts 1-4 has an established correct answer (discussed explicitly in each part's article), so this isn't a new labeled set built for this part — it's the ground truth the series has already been using, made explicit and measured systematically:
+recall@k for one query is 1 if the correct document appears anywhere in the top-k results, 0 otherwise. Averaged across queries, it answers a narrower but critical question: before worrying about rank order, did the retrieval stage even keep the right document in play? Every query used across Parts 1-4 has an established correct answer (discussed explicitly in each part's article), so this isn't a new labeled set built for this part — it's the ground truth the series has already been using, made explicit and measured systematically.
+
+**A note on sample size, stated up front rather than left for a reader to catch:** the first version of this evaluation ran on just 6 queries. With n=6, recall@1 moves in increments of 1/6 — about 17 percentage points — *per query*. A two-query swing reads as a dramatic 33-point regression, which risks overstating how precisely a 6-item sample can measure anything. So the ground truth below adds 12 more queries against the exact same 6-document corpus — no new documents, no change to the original 6 queries — chosen by plain vocabulary correspondence to one specific document, not chosen to push the result either way:
 
 ```python
 GROUND_TRUTH = {
+    # the original 6, unchanged
     "car oil change": 0,
     "automobile brake service": 1,
     "SKU-48213-B": 2,
     "weekend weather": 3,
     "oil change": 0,
     "automobile SKU-48213-B service": 1,
+    # 12 more, same corpus, ordinary non-adversarial queries
+    "brake pads replacement": 0,
+    "engine oil service": 1,
+    "SKU 48213 back order": 2,
+    "sunny afternoon weather": 3,
+    "car dealership weekend offer": 4,
+    "oil discount coupon": 5,
+    # ... (6 more, two per document; full list in corpus.py)
 }
 ```
 
-Running BM25 (Part 1), embeddings (Part 2), hybrid RRF (Part 3), and hybrid + reranking (Part 4) against this same ground truth:
+Running BM25 (Part 1), embeddings (Part 2), hybrid RRF (Part 3), and hybrid + reranking (Part 4) against all 18 queries:
 
 | stage | recall@1 | recall@2 | recall@3 |
 |---|---|---|---|
-| BM25 alone | 0.67 (4/6) | 1.00 | 1.00 |
-| Embeddings alone | 0.67 (4/6) | 1.00 | 1.00 |
-| Hybrid RRF | **0.83 (5/6)** | 1.00 | 1.00 |
-| Hybrid + reranked | **0.50 (3/6)** | 0.83 (5/6) | 1.00 |
+| BM25 alone | 0.89 (16/18) | 1.00 | 1.00 |
+| Embeddings alone | 0.89 (16/18) | 1.00 | 1.00 |
+| Hybrid RRF | **0.94 (17/18)** | 1.00 | 1.00 |
+| Hybrid + reranked | **0.83 (15/18)** | 0.94 (17/18) | 1.00 |
 
-By recall@3, every stage is perfect — the correct document never falls completely out of the candidate pool across any stage on this query set. But recall@1 tells a different, genuinely surprising story: **hybrid fusion is the best stage in the whole pipeline, and reranking makes it worse.** Not slightly worse — reranking's recall@1 (0.50) is lower than even BM25 or embeddings alone (0.67 each).
-
-This isn't a contradiction of Part 4 — it's the aggregate confirmation of exactly what Part 4 found query by query. Checking which specific queries changed:
+The regression is still there — **hybrid fusion is still the best stage, reranking still makes it worse** — but it shrank from a 33-point gap (0.83 → 0.50 at n=6) to an 11-point gap (0.94 → 0.83 at n=18). That shrinkage is exactly the sample-size effect it looks like: checking per-query, **the same 3 queries break and the same 1 query gets fixed as before** — none of the 12 new, ordinary queries flipped under any stage. The absolute count of broken/fixed queries didn't change at all; only the denominator did.
 
 | query | hybrid top-1 | reranked top-1 | effect |
 |---|---|---|---|
 | "car oil change" | doc0 (correct) | doc4 (wrong) | **reranking broke it** |
-| "automobile brake service" | doc1 (correct) | doc1 (correct) | unchanged |
-| "SKU-48213-B" | doc2 (correct) | doc2 (correct) | unchanged |
 | "weekend weather" | doc4 (wrong) | doc3 (correct) | **reranking fixed it** |
 | "oil change" | doc0 (correct) | doc5 (wrong, spam) | **reranking broke it** |
 | "automobile SKU-48213-B service" | doc1 (correct) | doc2 (wrong) | **reranking broke it** |
+| *(all 14 other queries)* | correct | correct | unchanged |
 
-Reranking fixed exactly one case — "weekend weather," the RRF tie Part 3 and Part 4 both highlighted as its success story. It broke three others: the two adversarial cases Part 4 flagged directly (exact-code injection, keyword stuffing), plus a third, "car oil change," where the hybrid stage was already correct and reranking's preference for doc4 over doc0 (the same preference pattern noted back in Part 2's embedding scores) pushed it to the wrong answer. Net effect on this query set: **-2 on recall@1.**
+This is the answer to "could the original result just be small-sample noise": partly yes, in that the *magnitude* (33 points) overstated what a 6-query sample can responsibly claim. But no, in that the *mechanism* doesn't depend on sample size at all — these are the same three identifiable, explainable failures from Part 4 (doc4-over-doc0 preference inherited from Part 2's embeddings, doc5's keyword stuffing fooling the cross-encoder, doc2's exact-code trap undoing RRF's rescue of doc1), and adding 12 more ordinary queries didn't dilute them away, because they're not noise — they're reproducible properties of this specific cross-encoder on this specific kind of adversarial input. Net effect, now measured on 18 queries instead of 6: **-2 on recall@1**, same as before — the number got more honest, not smaller.
 
-This doesn't mean cross-encoder reranking is bad in general — it's a standard, well-evidenced technique, and this corpus was deliberately stocked with adversarial cases built specifically to probe each stage's weak points across the whole series. What it does mean is that "add a reranker" is not automatically a win, and the only way to know whether it's a win *for your system, on your queries* is to measure it, exactly like this. Trusting the standard advice without measuring it against your own ground truth would have silently shipped a regression.
+This doesn't mean cross-encoder reranking is bad in general — it's a standard, well-evidenced technique, and this corpus was deliberately stocked with adversarial cases built specifically to probe each stage's weak points across the whole series. What it does mean is that "add a reranker" is not automatically a win, and the only way to know whether it's a win *for your system, on your queries* is to measure it, exactly like this — on enough queries that the number means what it claims to mean. Trusting the standard advice without measuring it against your own ground truth would have silently shipped a regression.
 
 ---
 
@@ -61,14 +69,14 @@ recall@k answers one question — is the correct document anywhere in the top-k?
 
 | stage | precision@1 | MRR | NDCG@1 |
 |---|---|---|---|
-| BM25 alone | 0.6667 | 0.8333 | 0.6667 |
-| Embeddings alone | 0.6667 | 0.8333 | 0.6667 |
-| Hybrid RRF | 0.8333 | 0.9167 | 0.8333 |
-| Hybrid + reranked | 0.5000 | 0.7222 | 0.5000 |
+| BM25 alone | 0.8889 | 0.9444 | 0.8889 |
+| Embeddings alone | 0.8889 | 0.9444 | 0.8889 |
+| Hybrid RRF | 0.9444 | 0.9722 | 0.9444 |
+| Hybrid + reranked | 0.8333 | 0.9074 | 0.8333 |
 
 Look closely and precision@1 and NDCG@1 are identical to recall@1 from the table above, row for row. That's not a coincidence worth glossing over — with this ground truth's single correct document per query, `precision@k` is an exact linear rescaling of `recall@k` (`precision@k = recall@k / k`, so at k=1 they're numerically identical), and NDCG collapses to the same binary signal as precision at k=1 with no graded relevance to show its actual strength (weighing "very relevant" against "somewhat relevant") off. Neither metric adds new information here; stating that plainly matters more than padding the post with metrics that look rigorous without actually measuring anything recall@k didn't already show.
 
-**MRR is the one that does add something.** Unlike the others, it credits partial correctness when the right document is close but not first: hybrid RRF's MRR (0.9167) is higher than its precision@1 (0.8333), because the one query hybrid got "wrong" at rank 1 still had the correct document at rank 2, and MRR gives that partial credit while precision@1 and recall@1 give it nothing. Reranking's MRR (0.7222) tells the same regression story as its recall@1 (0.50), just on a continuous scale instead of a binary one — useful for seeing *how bad* a miss was, not just whether it happened.
+**MRR is the one that does add something.** Unlike the others, it credits partial correctness when the right document is close but not first: hybrid RRF's MRR (0.9722) is higher than its precision@1 (0.9444), because the one query hybrid got "wrong" at rank 1 still had the correct document at rank 2, and MRR gives that partial credit while precision@1 and recall@1 give it nothing. Reranking's MRR (0.9074) tells the same regression story as its recall@1 (0.83), just on a continuous scale instead of a binary one — useful for seeing *how bad* a miss was, not just whether it happened.
 
 ---
 
@@ -117,7 +125,7 @@ Neither judge is good enough to ship as the sole safeguard. The naive version is
 
 ## What this means in practice
 
-- **Measure, don't assume — the recall@k table caught something query-by-query inspection in Part 4 had already shown, but seeing it as a single aggregate regression (-2 on recall@1 for adding reranking) is a much harder finding to wave away than individual anecdotes.** If you ship an improvement that isn't measured against ground truth on queries that matter to you, you can't actually tell whether it helped.
+- **Measure, don't assume — and measure on enough queries that the number means what it claims to mean.** The recall@k table caught something query-by-query inspection in Part 4 had already shown, but the first pass of this measurement (6 queries) overstated the regression's *size* (33 points) even though it got the *direction* right. Growing the query set to 18 didn't change which queries failed or why — it just replaced an exaggerated number with an honest one (11 points). Both the original anecdotes and the inflated aggregate would have been true in direction and wrong in magnitude if left unchecked.
 - **A judge model is a model, with its own failure modes, not an oracle.** Using an LLM to check another LLM's output doesn't sidestep the reliability problem, it just moves it one level up. The naive judge shares a blind spot with the generator it's checking.
 - **Decomposing a task into a narrower, more mechanical one is a real technique, but it's not free.** It worked cleanly for abstention in Part 5 (relevance check: a true binary with no middle ground). It's messier for groundedness, because "is this specific wording supported" sits on a spectrum between verbatim and fabricated, and forcing a binary "quote it or admit nothing exists" answer collapses that spectrum in a way that creates new errors.
 - **This is also a fitting place to end the core series.** Six parts ago, this started with raw term matching. It's ending with the sober conclusion that even the evaluation layer meant to catch mistakes has mistakes of its own — which is, honestly, the most production-realistic note a RAG series can end on.
