@@ -37,6 +37,11 @@ By construction, "database connection pool timeout" is the root cause in 4 of th
 Step one of building the graph: extract (team, system, cause) from each report, using the local `Qwen2.5-0.5B-Instruct` model with a structured-output prompt (same pattern as Part 9's query decomposition):
 
 ```python
+_EXTRACTION_PATTERN = re.compile(
+    r"TEAM:\s*(?P<team>.+?)\s*\n\s*SYSTEM:\s*(?P<system>.+?)\s*\n\s*CAUSE:\s*(?P<cause>.+?)\s*(?:\n|$)",
+    re.IGNORECASE,
+)
+
 def extract_entities(document: str, generator: Generator) -> dict | None:
     prompt = f"""Extract the team name, system name, and root cause from this incident report.
 Respond in EXACTLY this format, nothing else:
@@ -45,14 +50,44 @@ SYSTEM: <system name>
 CAUSE: <root cause, a few words>
 
 Incident report: {document}"""
-    ...
+    response = generator.generate_raw(prompt, max_new_tokens=40)
+    match = _EXTRACTION_PATTERN.search(response)
+    if not match:
+        return None  # malformed output -- tracked as a miss, not guessed at
+    return {
+        "team": match.group("team").strip().rstrip("."),
+        "system": match.group("system").strip().rstrip("."),
+        "cause": match.group("cause").strip().rstrip("."),
+    }
 ```
 
 Checked against the fixture's known ground truth: **6 of 9 correct.** The 3 misses share a specific pattern — the model swapped which field held which value. For doc1 ("Team Orion's payment service had an outage... Root cause: a database connection pool timeout"), it extracted `team: "Orion's Payment Service"` and `system: "Database Connection Pool Timeout"` — the cause landed in the system slot, and the team/system got merged into one string. The same swap happened on docs 4 and 7. All three misses are sentences where the system name sits right next to a possessive ("Orion's X service"), a different surface pattern from the cleaner "Team Atlas's checkout service" phrasing the model handled correctly every time. A 500M-parameter model extracting structured fields from free text is reliable on the common phrasing and not on its own minor variations — exactly the kind of thing that's invisible until you check against real ground truth, not just eyeball a couple of outputs.
 
 ## 2. Local search: a dead heat
 
-For ordinary single-document lookups ("What caused Team Nimbus's search service slowdown?"), graph traversal (walk from the team node and the system node to their shared document) and flat embedding retrieval both got all 3 test queries right:
+The graph itself is a plain dict of sets — no library, this is small enough to do by hand. Every document is a hub connected to its own team/system/cause nodes:
+
+```python
+def build_graph(entities: list[dict]) -> dict[str, set[str]]:
+    graph: dict[str, set[str]] = defaultdict(set)
+    for i, entity in enumerate(entities):
+        doc_node = f"doc:{i}"
+        for kind in ("team", "system", "cause"):
+            entity_node = f"{kind}:{entity[kind]}"
+            graph[doc_node].add(entity_node)
+            graph[entity_node].add(doc_node)
+    return graph
+
+def local_search(team: str, system: str, graph: dict[str, set[str]]) -> int | None:
+    """Find the document connected to BOTH this team and this system
+    node -- a direct graph traversal, no similarity scoring involved."""
+    team_docs = {n for n in graph.get(f"team:{team}", set()) if n.startswith("doc:")}
+    system_docs = {n for n in graph.get(f"system:{system}", set()) if n.startswith("doc:")}
+    matches = team_docs & system_docs
+    return int(next(iter(matches)).split(":")[1]) if matches else None
+```
+
+"Team Nimbus" and "search" each connect to several documents on their own (every incident involving Nimbus, every incident involving the search system); intersecting their neighbor sets leaves exactly the one document that mentions both — no ranking, no score, just set intersection. For ordinary single-document lookups like this, graph traversal and flat embedding retrieval both got all 3 test queries right:
 
 | query | graph traversal | flat embeddings |
 |---|---|---|
@@ -64,7 +99,33 @@ No daylight between them here, and that's an honest, expected result, not a letd
 
 ## 3. Global search: the thing flat retrieval structurally cannot do
 
-Indexing time produces pre-written community summaries (one line per root cause, not per document):
+Communities, here, are just documents grouped by shared cause — on a graph this small and this cleanly separated, that's what real Leiden clustering would converge toward anyway:
+
+```python
+def build_communities(entities: list[dict]) -> dict[str, list[int]]:
+    communities: dict[str, list[int]] = defaultdict(list)
+    for i, entity in enumerate(entities):
+        communities[entity["cause"]].append(i)
+    return communities
+
+def summarize_community(cause: str, doc_indices: list[int], entities: list[dict]) -> str:
+    """Pre-written at indexing time: one line per COMMUNITY, not per
+    document -- this is what global search reasons over instead of raw text."""
+    teams = sorted({entities[i]["team"] for i in doc_indices})
+    return f"Root cause '{cause}': {len(doc_indices)} incident(s), affecting teams {', '.join(teams)}."
+
+def global_search(community_summaries: list[str], query: str, generator: Generator) -> str:
+    summaries_block = "\n".join(f"- {s}" for s in community_summaries)
+    prompt = f"""Community summaries (each covers multiple incidents sharing one root cause):
+{summaries_block}
+
+Question: {query}
+
+Answer using ONLY the summaries above."""
+    return generator.generate_raw(prompt, max_new_tokens=60)
+```
+
+Running this at indexing time produces five summaries, one per distinct root cause:
 
 ```
 - Root cause 'database connection pool timeout': 4 incident(s), affecting teams Atlas, Nimbus, Orion.

@@ -27,6 +27,68 @@ pubDate: 'Nov 02 2026'
 
 "What is the early termination fee for the Business plan?" needs the model to know it's in the Business plan's section — the sentence structure is nearly identical across all three, so the number is almost the entire signal distinguishing them.
 
+The document is represented exactly as that outline suggests — a plain nested Python dict, section titles and child lists, nothing else:
+
+```python
+DOCUMENT_TREE = {
+    "title": "Service Agreement",
+    "children": [
+        {
+            "title": "1. Residential Plan",
+            "children": [
+                {"title": "1.1 Pricing", "text": "The Residential Plan costs $19.99 per month..."},
+                {"title": "1.2 Fees", "text": "The Residential Plan has an early termination fee of $50..."},
+                {"title": "1.3 Cancellation Terms", "text": "Residential Plan cancellations take effect..."},
+            ],
+        },
+        # ... Business Plan, Enterprise Plan, same shape
+    ],
+}
+```
+
+---
+
+## How navigation actually works
+
+```python
+_LETTERS = "ABCDEFGHIJ"
+
+def _choose_child(query: str, node: dict, generator: Generator) -> tuple[dict, bool]:
+    """Asks the model to pick one of this node's child titles; falls back
+    to the first child if the answer doesn't clearly match any title."""
+    children = node["children"]
+    titles = [c["title"] for c in children]
+    lettered = "\n".join(f"{_LETTERS[i]}. {t}" for i, t in enumerate(titles))
+    prompt = f"""Question: {query}
+
+Which of these sections is most likely to contain the answer? Respond with
+ONLY the letter of the section, nothing else.
+
+Sections:
+{lettered}"""
+    response = generator.generate_raw(prompt, max_new_tokens=5).strip().upper()
+
+    for i, title in enumerate(titles):
+        if _LETTERS[i] in response:
+            return children[i], False
+    for child in children:  # fallback: substring match on title text
+        if child["title"].lower() in response.lower():
+            return child, False
+    return children[0], True  # fallback: no match at all
+
+
+def navigate_tree(query: str, generator: Generator, root: dict = DOCUMENT_TREE) -> tuple[str, str, bool]:
+    """Descends top-down. Returns (section_path, leaf_text, any_fallback_used)."""
+    node, path, any_fallback = root, root["title"], False
+    while "children" in node:
+        node, used_fallback = _choose_child(query, node, generator)
+        any_fallback = any_fallback or used_fallback
+        path = f"{path} > {node['title']}"
+    return path, node["text"], any_fallback
+```
+
+Three levels in this tree (Service Agreement → Plan → Subsection), so `navigate_tree` makes three model calls per query, each one choosing among 2-3 titles — never looking at a single leaf's actual text until the final choice is made.
+
 ---
 
 ## A real bug, caught before it became a fake finding
