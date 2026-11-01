@@ -114,6 +114,6 @@ Reranking doesn't fix this one either — doc2 still wins. But doc6 moves from d
 
 ## What's next
 
-Part 5 moves to the generation layer: taking retrieved (and now reranked) context and actually constructing a prompt for an LLM — chunking strategy, grounding, citation formatting, and what the system should do when retrieval legitimately finds nothing relevant (which, given this part's findings, is a real possibility to design for, not an edge case to ignore).
+Part 5 moves to the generation layer: taking retrieved (and now reranked) context and actually constructing a prompt for an LLM — grounding, citation formatting, and what the system does when retrieval legitimately finds nothing relevant. The queries this part flagged as broken (exact-code injection, keyword stuffing) turn out to matter even more downstream, once there's a generated answer a user actually reads.
 
 Full code for this post, and the rest of the series: [github.com/Thimmasani/rag-from-scratch](https://github.com/Thimmasani/rag-from-scratch) — see `retrieval/reranker.py`, `compare_reranked.py` (produces the tables above).

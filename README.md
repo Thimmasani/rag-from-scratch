@@ -20,17 +20,20 @@ Live site: [dineshreddythimmasani.com](https://dineshreddythimmasani.com)
 │   ├── embeddings.py      # Part 2: semantic retrieval (sentence-transformers)
 │   ├── rrf.py              # Part 3: Reciprocal Rank Fusion / hybrid retrieval
 │   ├── reranker.py          # Part 4: cross-encoder reranking
-│   ├── compare.py            # Part 1: TF-IDF vs BM25 table
-│   ├── compare_semantic.py    # Part 2: TF-IDF vs BM25 vs embeddings table
-│   ├── compare_hybrid.py       # Part 3: BM25 vs embeddings vs RRF table
-│   ├── compare_reranked.py      # Part 4: hybrid vs reranked table
-│   ├── query.py                  # interactive CLI (lexical)
-│   └── README.md                  # setup, including model download instructions
+│   ├── generation.py         # Part 5: generation, abstention, citations
+│   ├── pipeline.py            # Part 5: the full Parts 1-5 pipeline, end to end
+│   ├── compare.py               # Part 1: TF-IDF vs BM25 table
+│   ├── compare_semantic.py       # Part 2: TF-IDF vs BM25 vs embeddings table
+│   ├── compare_hybrid.py          # Part 3: BM25 vs embeddings vs RRF table
+│   ├── compare_reranked.py         # Part 4: hybrid vs reranked table
+│   ├── query.py                     # interactive CLI (lexical)
+│   └── README.md                     # setup, including model download instructions
 └── writing/           # article drafts, one per series part
     ├── 01_tfidf_bm25.md
     ├── 02_embeddings.md
     ├── 03_hybrid_rrf.md
-    └── 04_reranking.md
+    ├── 04_reranking.md
+    └── 05_generation.md
 ```
 
 ## Series plan
@@ -39,7 +42,7 @@ Live site: [dineshreddythimmasani.com](https://dineshreddythimmasani.com)
 2. **Semantic retrieval** — embeddings, where they fix lexical failures, where they don't. ✅ published
 3. **Hybrid retrieval** — BM25 + semantic fusion (RRF), and RRF's own tie-breaking blind spot. ✅ published
 4. **Reranking** — cross-encoders fix one RRF tie cleanly, but introduce two new failure modes of their own. ✅ published
-5. The generation layer — prompt construction, grounding, citations
+5. **The generation layer** — abstention and citations both fail as single-shot instructions and need to be split into separate steps; citation attribution isn't claim verification. ✅ published
 6. Evaluating RAG — recall@k, groundedness scoring
 7. (stretch) Query rewriting/expansion, production lessons learned
 
@@ -67,6 +70,9 @@ python3 compare_hybrid.py
 
 python3 reranker.py           # Part 4, downloads a cross-encoder model on first run
 python3 compare_reranked.py
+
+python3 generation.py         # Part 5, downloads a small generation model on first run
+python3 pipeline.py           # the full Parts 1-5 pipeline, run on every series query
 ```
 
 ## Running the site locally

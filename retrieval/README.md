@@ -29,14 +29,18 @@ and don't belong in git history:
   for embeddings.
 - Part 4: `cross-encoder/ms-marco-MiniLM-L-6-v2` (~130MB), a cross-encoder
   for reranking.
+- Part 5: `Qwen/Qwen2.5-0.5B-Instruct` (~1GB), a small instruction-tuned
+  model for generation, run locally via `transformers` (already a
+  dependency of `sentence-transformers`, no extra install needed).
 
-`sentence-transformers` downloads and caches each model automatically the
-first time you run a script that uses it:
+Each downloads and caches automatically the first time you run a script
+that uses it:
 
 ```bash
 source .venv/bin/activate
 python3 embeddings.py   # downloads the bi-encoder on first run
 python3 reranker.py     # downloads the cross-encoder on first run
+python3 generation.py   # downloads the generation model on first run
 ```
 
 The first run of each downloads the model to Hugging Face's local cache
@@ -77,6 +81,10 @@ python3 compare_hybrid.py   # BM25 vs embeddings vs RRF, including the tie case
 # Part 4 -- cross-encoder reranking
 python3 reranker.py         # rerank hybrid candidates with a cross-encoder
 python3 compare_reranked.py # before/after tables, including two new failure modes
+
+# Part 5 -- generation (abstention + citation attribution)
+python3 generation.py       # grounded answer, abstention, and citation examples
+python3 pipeline.py         # the FULL pipeline: Parts 1-5 wired together
 ```
 
 `compare_semantic.py` runs two things: the three-way TF-IDF/BM25/embeddings
@@ -103,3 +111,5 @@ calculations.
 | `compare_hybrid.py` | 3 | BM25 vs embeddings vs RRF, including the exact-tie case |
 | `reranker.py` | 4 | `CrossEncoderReranker`, reranks a short candidate list |
 | `compare_reranked.py` | 4 | Hybrid vs reranked, including two new reranker failure modes |
+| `generation.py` | 5 | `Generator`: relevance check, grounded generation, citation attribution |
+| `pipeline.py` | 5 | The full Parts 1-5 pipeline, run end to end on every series query |
