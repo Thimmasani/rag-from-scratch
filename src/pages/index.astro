@@ -38,49 +38,94 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 				</div>
 			</div>
 
-			<section class="series">
-				<h2>RAG</h2>
-				<ul class="series-list">
-					<li class="done">
-						<a href="/blog/rag-from-scratch-01-tfidf-bm25/">Part 1: Lexical retrieval — TF-IDF &amp; BM25</a>
-					</li>
-					<li class="done">
-						<a href="/blog/rag-from-scratch-02-embeddings/">Part 2: Semantic retrieval — embeddings</a>
-					</li>
-					<li class="done">
-						<a href="/blog/rag-from-scratch-03-hybrid-rrf/">Part 3: Hybrid retrieval — BM25 + semantic fusion (RRF)</a>
-					</li>
-					<li class="done">
-						<a href="/blog/rag-from-scratch-04-reranking/">Part 4: Cross-encoder reranking (and where it fails too)</a>
-					</li>
-					<li class="done">
-						<a href="/blog/rag-from-scratch-05-generation/">Part 5: The generation layer</a>
-					</li>
-					<li class="done">
-						<a href="/blog/rag-from-scratch-06-evaluation/">Part 6: Evaluating the whole pipeline</a>
-					</li>
-					<li class="done">
-						<a href="/blog/rag-from-scratch-07-chunking/">Part 7: Chunking</a>
-					</li>
-					<li class="done">
-						<a href="/blog/rag-from-scratch-08-vector-search-at-scale/">Part 8: Vector search at scale (ANN + metadata filtering)</a>
-					</li>
-					<li class="done">
-						<a href="/blog/rag-from-scratch-09-multihop-retrieval/">Part 9: Multi-hop retrieval</a>
-					</li>
-					<li class="done">
-						<a href="/blog/rag-from-scratch-10-long-context/">Part 10: RAG vs. long-context LLMs</a>
-					</li>
-				</ul>
+			<div class="section-label">Series</div>
+
+			<section class="series-card">
+				<div class="series-top">
+					<h2 class="series-title">Retrieval-Augmented Generation (RAG)</h2>
+					<span class="series-meta">10 parts &middot; from scratch, no framework abstractions</span>
+				</div>
+				<p class="series-desc">
+					Lexical retrieval through evaluation, then chunking, vector search at scale, multi-hop
+					retrieval, and RAG vs. long-context — every number backed by code that actually ran.
+				</p>
+				<div class="highlight">
+					<strong>Most surprising finding:</strong> adding cross-encoder reranking made recall@1
+					<em>worse</em>, not better — 0.83 &rarr; 0.50 on the series' own eval set.
+				</div>
+				<div class="series-actions">
+					<a class="start-link" href="/blog/rag-from-scratch-01-tfidf-bm25/">Start at Part 1 &rarr;</a>
+					<details>
+						<summary>All 10 parts</summary>
+						<ul class="part-list">
+							<li><a href="/blog/rag-from-scratch-01-tfidf-bm25/">1. Lexical retrieval — TF-IDF &amp; BM25</a></li>
+							<li><a href="/blog/rag-from-scratch-02-embeddings/">2. Semantic retrieval — embeddings</a></li>
+							<li><a href="/blog/rag-from-scratch-03-hybrid-rrf/">3. Hybrid retrieval — BM25 + RRF</a></li>
+							<li><a href="/blog/rag-from-scratch-04-reranking/">4. Cross-encoder reranking (and where it fails too)</a></li>
+							<li><a href="/blog/rag-from-scratch-05-generation/">5. The generation layer</a></li>
+							<li><a href="/blog/rag-from-scratch-06-evaluation/">6. Evaluating the whole pipeline</a></li>
+							<li><a href="/blog/rag-from-scratch-07-chunking/">7. Chunking</a></li>
+							<li><a href="/blog/rag-from-scratch-08-vector-search-at-scale/">8. Vector search at scale (ANN + metadata filtering)</a></li>
+							<li><a href="/blog/rag-from-scratch-09-multihop-retrieval/">9. Multi-hop retrieval</a></li>
+							<li><a href="/blog/rag-from-scratch-10-long-context/">10. RAG vs. long-context LLMs</a></li>
+						</ul>
+						<a class="also-link" href="/blog/rag-interview-questions/">&rarr; RAG Interview Questions (28 Q&amp;A, same series' data)</a>
+					</details>
+				</div>
 			</section>
 
-			<section class="series">
-				<h2>Also</h2>
-				<ul class="series-list">
-					<li class="done">
-						<a href="/blog/rag-interview-questions/">RAG Interview Questions — easy to senior, with real data and examples</a>
-					</li>
-				</ul>
+			<section class="series-card placeholder">
+				<div class="series-top">
+					<h2 class="series-title">Fine-tuning &amp; LoRA</h2>
+					<span class="coming-soon-tag">in progress</span>
+				</div>
+				<p class="series-desc">
+					Hand-rolled LoRA adapters, QLoRA, comparing a from-scratch implementation against <code>peft</code>.
+				</p>
+			</section>
+
+			<section class="series-card placeholder">
+				<div class="series-top">
+					<h2 class="series-title">AI Workflows &amp; Agents</h2>
+					<span class="coming-soon-tag">planned</span>
+				</div>
+				<p class="series-desc">
+					ReAct-style agent loops built from scratch, then rebuilt in LangGraph to compare what the
+					framework actually abstracts.
+				</p>
+			</section>
+
+			<section class="series-card placeholder">
+				<div class="series-top">
+					<h2 class="series-title">Evals &amp; Observability</h2>
+					<span class="coming-soon-tag">planned</span>
+				</div>
+				<p class="series-desc">
+					Retrieval and generation eval harnesses, LLM-as-judge design, latency/cost tracking,
+					regression gates.
+				</p>
+			</section>
+
+			<section class="series-card placeholder">
+				<div class="series-top">
+					<h2 class="series-title">Recommendations &amp; Search</h2>
+					<span class="coming-soon-tag">planned</span>
+				</div>
+				<p class="series-desc">
+					Learning-to-rank, CTR calibration, cold start, the retrieval&rarr;ranking&rarr;rerank funnel
+					outside of RAG.
+				</p>
+			</section>
+
+			<section class="series-card placeholder">
+				<div class="series-top">
+					<h2 class="series-title">Traditional ML</h2>
+					<span class="coming-soon-tag">planned</span>
+				</div>
+				<p class="series-desc">
+					The fundamentals series — bias/variance, regularization, evaluation metrics, feature
+					engineering — from scratch.
+				</p>
 			</section>
 		</main>
 		<Footer />
@@ -134,51 +179,163 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 		}
 	}
 
-	.series {
-		margin-top: 2.5em;
-		padding: 0 0.5em;
+	.section-label {
+		font-size: 0.78em;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: rgb(var(--gray));
+		font-weight: 700;
+		margin: 2.5em 0 0.9em 0.6em;
 	}
-	.series h2 {
-		font-size: 1.2em;
-		margin: 0 0 1em 0;
+
+	.series-card {
+		background: #fff;
+		border-radius: 12px;
+		padding: 1.8em 2em;
+		margin-bottom: 1.1em;
+		box-shadow:
+			0 1px 3px rgba(var(--gray), 20%),
+			0 1px 2px rgba(var(--gray), 15%);
+		border: 1px solid rgb(var(--gray-light));
 	}
-	.series-list {
-		list-style: none;
+	.series-card.placeholder {
+		opacity: 0.6;
+		border-style: dashed;
+	}
+	.series-top {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 1em;
+		flex-wrap: wrap;
+	}
+	.series-title {
+		font-size: 1.15em;
+		font-weight: 700;
 		margin: 0;
+	}
+	.series-meta {
+		font-size: 0.82em;
+		color: rgb(var(--gray));
+		white-space: nowrap;
+	}
+	.series-desc {
+		font-size: 0.92em;
+		color: rgb(var(--gray-dark));
+		margin: 0.5em 0 1em 0;
+		max-width: 620px;
+	}
+	.placeholder .series-title {
+		color: rgb(var(--gray-dark));
+	}
+	.placeholder .series-desc {
+		font-style: italic;
+		margin-bottom: 0;
+	}
+	.coming-soon-tag {
+		font-size: 0.72em;
+		background: rgb(var(--gray-light));
+		color: rgb(var(--gray));
+		padding: 0.2em 0.6em;
+		border-radius: 10px;
+		font-weight: 700;
+		letter-spacing: 0.03em;
+	}
+
+	.highlight {
+		background: #f0f2ff;
+		border-left: 3px solid var(--accent);
+		border-radius: 6px;
+		padding: 0.7em 1em;
+		font-size: 0.88em;
+		margin-bottom: 1.1em;
+		color: var(--accent-dark);
+	}
+	.highlight strong {
+		color: var(--accent-dark);
+	}
+
+	.series-actions {
+		display: flex;
+		align-items: baseline;
+		gap: 1.2em;
+		flex-wrap: wrap;
+	}
+	.start-link {
+		font-weight: 700;
+		font-size: 0.92em;
+		color: var(--accent);
+		text-decoration: none;
+	}
+	.start-link:hover {
+		text-decoration: underline;
+	}
+
+	details {
+		margin-top: 0;
+	}
+	summary {
+		cursor: pointer;
+		font-size: 0.88em;
+		color: rgb(var(--gray));
+		list-style: none;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3em;
+		user-select: none;
+	}
+	summary::-webkit-details-marker {
+		display: none;
+	}
+	summary::before {
+		content: '▸';
+		font-size: 0.8em;
+		transition: transform 0.15s;
+	}
+	details[open] summary::before {
+		transform: rotate(90deg);
+	}
+
+	.part-list {
+		list-style: none;
+		margin: 0.8em 0 0 0;
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.7em;
+		gap: 0.45em;
 	}
-	.series-list li {
-		font-size: 0.95em;
-		padding-left: 1.4em;
+	.part-list li {
+		font-size: 0.88em;
+		padding-left: 1.2em;
 		position: relative;
 	}
-	.series-list li::before {
+	.part-list li::before {
 		content: '';
 		position: absolute;
 		left: 0;
-		top: 0.5em;
-		width: 8px;
-		height: 8px;
+		top: 0.55em;
+		width: 6px;
+		height: 6px;
 		border-radius: 50%;
-	}
-	.series-list li.done::before {
 		background: var(--accent);
 	}
-	.series-list li.upcoming::before {
-		background: rgb(var(--gray-light));
-	}
-	.series-list li.upcoming {
-		color: rgb(var(--gray));
-	}
-	.series-list li.done a {
-		color: var(--black);
+	.part-list a {
+		color: rgb(var(--black));
 		text-decoration: none;
-		font-weight: 600;
 	}
-	.series-list li.done a:hover {
-		text-decoration: underline;
+	.part-list a:hover {
+		color: var(--accent);
+	}
+	.also-link {
+		font-size: 0.85em;
+		margin-top: 0.9em;
+		display: block;
+		color: rgb(var(--gray-dark));
+	}
+
+	@media (max-width: 600px) {
+		.series-card {
+			padding: 1.3em 1.4em;
+		}
 	}
 </style>
