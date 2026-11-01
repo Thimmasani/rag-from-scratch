@@ -139,6 +139,6 @@ Instead: another exact tie. Same mechanism as "weekend weather" — doc1 is rank
 
 ## What's next
 
-Part 4 takes the fused candidates from this part's hybrid retriever and reranks them with a cross-encoder — a model that scores a query and a document together instead of independently, at the cost of being too slow to run over an entire corpus (which is why it reranks a short candidate list instead of replacing retrieval entirely).
+Part 4 takes the fused candidates from this part's hybrid retriever and reranks them with a cross-encoder — a model that scores a query and a document together instead of independently, at the cost of being too slow to run over an entire corpus (which is why it reranks a short candidate list instead of replacing retrieval entirely). It fixes this part's tie cleanly, and is honest about two new failure modes of its own.
 
 Full code for this post, and the rest of the series: [github.com/Thimmasani/rag-from-scratch](https://github.com/Thimmasani/rag-from-scratch) — see `retrieval/rrf.py`, `compare_hybrid.py` (produces the tables above).
