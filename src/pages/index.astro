@@ -45,33 +45,19 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 					<h2 class="series-title">Retrieval-Augmented Generation (RAG)</h2>
 					<span class="series-meta">10 parts &middot; from scratch, no framework abstractions</span>
 				</div>
-				<p class="series-desc">
-					Lexical retrieval through evaluation, then chunking, vector search at scale, multi-hop
-					retrieval, and RAG vs. long-context — every number backed by code that actually ran.
-				</p>
-				<div class="highlight">
-					<strong>Most surprising finding:</strong> adding cross-encoder reranking made recall@1
-					<em>worse</em>, not better — 0.83 &rarr; 0.50 on the series' own eval set.
-				</div>
-				<div class="series-actions">
-					<a class="start-link" href="/blog/rag-from-scratch-01-tfidf-bm25/">Start at Part 1 &rarr;</a>
-					<details>
-						<summary>All 10 parts</summary>
-						<ul class="part-list">
-							<li><a href="/blog/rag-from-scratch-01-tfidf-bm25/">1. Lexical retrieval — TF-IDF &amp; BM25</a></li>
-							<li><a href="/blog/rag-from-scratch-02-embeddings/">2. Semantic retrieval — embeddings</a></li>
-							<li><a href="/blog/rag-from-scratch-03-hybrid-rrf/">3. Hybrid retrieval — BM25 + RRF</a></li>
-							<li><a href="/blog/rag-from-scratch-04-reranking/">4. Cross-encoder reranking (and where it fails too)</a></li>
-							<li><a href="/blog/rag-from-scratch-05-generation/">5. The generation layer</a></li>
-							<li><a href="/blog/rag-from-scratch-06-evaluation/">6. Evaluating the whole pipeline</a></li>
-							<li><a href="/blog/rag-from-scratch-07-chunking/">7. Chunking</a></li>
-							<li><a href="/blog/rag-from-scratch-08-vector-search-at-scale/">8. Vector search at scale (ANN + metadata filtering)</a></li>
-							<li><a href="/blog/rag-from-scratch-09-multihop-retrieval/">9. Multi-hop retrieval</a></li>
-							<li><a href="/blog/rag-from-scratch-10-long-context/">10. RAG vs. long-context LLMs</a></li>
-						</ul>
-						<a class="also-link" href="/blog/rag-interview-questions/">&rarr; RAG Interview Questions (28 Q&amp;A, same series' data)</a>
-					</details>
-				</div>
+				<ul class="part-list">
+					<li><a href="/blog/rag-from-scratch-01-tfidf-bm25/">1. Lexical retrieval — TF-IDF &amp; BM25</a></li>
+					<li><a href="/blog/rag-from-scratch-02-embeddings/">2. Semantic retrieval — embeddings</a></li>
+					<li><a href="/blog/rag-from-scratch-03-hybrid-rrf/">3. Hybrid retrieval — BM25 + RRF</a></li>
+					<li><a href="/blog/rag-from-scratch-04-reranking/">4. Cross-encoder reranking (and where it fails too)</a></li>
+					<li><a href="/blog/rag-from-scratch-05-generation/">5. The generation layer</a></li>
+					<li><a href="/blog/rag-from-scratch-06-evaluation/">6. Evaluating the whole pipeline</a></li>
+					<li><a href="/blog/rag-from-scratch-07-chunking/">7. Chunking</a></li>
+					<li><a href="/blog/rag-from-scratch-08-vector-search-at-scale/">8. Vector search at scale (ANN + metadata filtering)</a></li>
+					<li><a href="/blog/rag-from-scratch-09-multihop-retrieval/">9. Multi-hop retrieval</a></li>
+					<li><a href="/blog/rag-from-scratch-10-long-context/">10. RAG vs. long-context LLMs</a></li>
+				</ul>
+				<a class="also-link" href="/blog/rag-interview-questions/">&rarr; RAG Interview Questions (28 Q&amp;A, same series' data)</a>
 			</section>
 
 			<section class="series-card placeholder">
@@ -242,63 +228,9 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 		letter-spacing: 0.03em;
 	}
 
-	.highlight {
-		background: #f0f2ff;
-		border-left: 3px solid var(--accent);
-		border-radius: 6px;
-		padding: 0.7em 1em;
-		font-size: 0.88em;
-		margin-bottom: 1.1em;
-		color: var(--accent-dark);
-	}
-	.highlight strong {
-		color: var(--accent-dark);
-	}
-
-	.series-actions {
-		display: flex;
-		align-items: baseline;
-		gap: 1.2em;
-		flex-wrap: wrap;
-	}
-	.start-link {
-		font-weight: 700;
-		font-size: 0.92em;
-		color: var(--accent);
-		text-decoration: none;
-	}
-	.start-link:hover {
-		text-decoration: underline;
-	}
-
-	details {
-		margin-top: 0;
-	}
-	summary {
-		cursor: pointer;
-		font-size: 0.88em;
-		color: rgb(var(--gray));
-		list-style: none;
-		display: inline-flex;
-		align-items: center;
-		gap: 0.3em;
-		user-select: none;
-	}
-	summary::-webkit-details-marker {
-		display: none;
-	}
-	summary::before {
-		content: '▸';
-		font-size: 0.8em;
-		transition: transform 0.15s;
-	}
-	details[open] summary::before {
-		transform: rotate(90deg);
-	}
-
 	.part-list {
 		list-style: none;
-		margin: 0.8em 0 0 0;
+		margin: 1em 0 0 0;
 		padding: 0;
 		display: flex;
 		flex-direction: column;
